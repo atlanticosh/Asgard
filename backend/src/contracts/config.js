@@ -11,7 +11,7 @@ function loadABI(contractName) {
   try {
     const artifactPath = path.join(
       __dirname,
-      'artifacts',
+      '../../artifacts/contracts',
       `${contractName}.sol`,
       `${contractName}.json`
     );

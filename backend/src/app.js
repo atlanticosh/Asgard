@@ -23,7 +23,12 @@ const analyticsRoutes = require('./routes/analytics.routes');
 const {
   router: healthRoutes,
   setEthereumService,
+  setStellarService,
 } = require('./routes/health.routes');
+const {
+  router: stellarRoutes,
+  setStellarService: setStellarServiceForRoutes,
+} = require('./routes/stellar.routes');
 
 // Import middleware
 const {
@@ -36,6 +41,7 @@ const { authenticateToken } = require('./middleware/auth.middleware');
 const WebSocketService = require('./services/websocket.service');
 const MonitoringService = require('./services/monitoring.service');
 const EthereumService = require('./services/ethereum.service');
+const StellarService = require('./services/stellar.service');
 
 const app = express();
 const server = http.createServer(app);
@@ -53,6 +59,7 @@ const io = socketIo(server, {
 const webSocketService = new WebSocketService(io);
 const monitoringService = new MonitoringService();
 const ethereumService = new EthereumService();
+const stellarService = new StellarService();
 
 // Security middleware
 app.use(
@@ -139,6 +146,7 @@ app.use('/api/bridge', bridgeRoutes);
 app.use('/api/user', authenticateToken, userRoutes);
 app.use('/api/game', authenticateToken, gameRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/stellar', stellarRoutes);
 
 // WebSocket connection handling
 io.on('connection', (socket) => {
@@ -219,9 +227,15 @@ async function startServer() {
     await ethereumService.initialize();
     logger.info('Ethereum service initialized successfully');
 
-    // Inject Ethereum service into routes
+    // Initialize Stellar service
+    await stellarService.initialize();
+    logger.info('Stellar service initialized successfully');
+
+    // Inject services into routes
     setEthereumService(ethereumService);
     setBridgeEthereumService(ethereumService);
+    setStellarService(stellarService);
+    setStellarServiceForRoutes(stellarService);
 
     // Start monitoring services
     await monitoringService.start();
@@ -267,7 +281,7 @@ async function startServer() {
 }
 
 // Export for testing
-module.exports = { app, server, ethereumService };
+module.exports = { app, server, ethereumService, stellarService };
 
 // Start the server if this file is run directly
 if (require.main === module) {

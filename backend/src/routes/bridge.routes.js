@@ -197,4 +197,109 @@ router.get('/contracts', getEthereumService, async (req, res) => {
   }
 });
 
+// Test HTLC creation on Ethereum
+router.post('/test-htlc', getEthereumService, async (req, res) => {
+  try {
+    const { contractId, participant, amount, hashlock, timelock, asset } =
+      req.body;
+
+    if (!contractId || !participant || !amount || !hashlock || !timelock) {
+      return res.status(400).json({
+        success: false,
+        error:
+          'Missing required fields: contractId, participant, amount, hashlock, timelock',
+      });
+    }
+
+    let result;
+    if (asset === 'ETH') {
+      result = await req.ethereumService.createHTLCForETH({
+        contractId,
+        participant,
+        amount,
+        hashlock,
+        timelock,
+        stellarAddress:
+          'GCLTXZ72C6SXZT73NW4SAMHE7RJXOY2B7N66UMX7MMIUEAJBDW752JTN',
+      });
+    } else {
+      result = await req.ethereumService.createHTLCForToken({
+        contractId,
+        participant,
+        tokenAddress: req.ethereumService.config.addresses.MockUSDC,
+        amount,
+        hashlock,
+        timelock,
+        stellarAddress:
+          'GCLTXZ72C6SXZT73NW4SAMHE7RJXOY2B7N66UMX7MMIUEAJBDW752JTN',
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    logger.error('Failed to create Ethereum HTLC', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create Ethereum HTLC',
+    });
+  }
+});
+
+// Get HTLC details
+router.get('/htlc/:contractId', getEthereumService, async (req, res) => {
+  try {
+    const { contractId } = req.params;
+
+    if (!contractId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required field: contractId',
+      });
+    }
+
+    const result = await req.ethereumService.getHTLCDetails(contractId);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    logger.error('Failed to get HTLC details', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get HTLC details',
+    });
+  }
+});
+
+// Withdraw HTLC on Ethereum
+router.post('/withdraw-htlc', getEthereumService, async (req, res) => {
+  try {
+    const { contractId, preimage } = req.body;
+
+    if (!contractId || !preimage) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: contractId, preimage',
+      });
+    }
+
+    const result = await req.ethereumService.withdrawHTLC(contractId, preimage);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    logger.error('Failed to withdraw Ethereum HTLC', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to withdraw Ethereum HTLC',
+    });
+  }
+});
+
 module.exports = { router, setEthereumService };

@@ -4,21 +4,37 @@ const logger = require('../utils/logger');
 
 // Service registry - will be injected
 let ethereumService = null;
+let coordinatorService = null;
 
 // Function to inject ethereum service
 function setEthereumService(service) {
   ethereumService = service;
 }
 
+function setCoordinatorService(service) {
+  coordinatorService = service;
+}
+
 // Middleware to get ethereum service instance
 const getEthereumService = (req, res, next) => {
   if (!ethereumService) {
-    return res.status(500).json({
+    return res.status(503).json({
       success: false,
       error: 'Ethereum service not available',
     });
   }
   req.ethereumService = ethereumService;
+  next();
+};
+
+const getCoordinatorService = (req, res, next) => {
+  if (!coordinatorService) {
+    return res.status(503).json({
+      success: false,
+      error: 'Bridge coordinator service not available',
+    });
+  }
+  req.coordinatorService = coordinatorService;
   next();
 };
 
@@ -211,10 +227,14 @@ router.post('/test-htlc', getEthereumService, async (req, res) => {
       });
     }
 
+    // Convert contractId to bytes32 if it's a string
+    const ethers = require('ethers');
+    const hashedContractId = ethers.keccak256(ethers.toUtf8Bytes(contractId));
+
     let result;
     if (asset === 'ETH') {
       result = await req.ethereumService.createHTLCForETH({
-        contractId,
+        contractId: hashedContractId,
         participant,
         amount,
         hashlock,
@@ -224,7 +244,7 @@ router.post('/test-htlc', getEthereumService, async (req, res) => {
       });
     } else {
       result = await req.ethereumService.createHTLCForToken({
-        contractId,
+        contractId: hashedContractId,
         participant,
         tokenAddress: req.ethereumService.config.addresses.MockUSDC,
         amount,
@@ -287,7 +307,14 @@ router.post('/withdraw-htlc', getEthereumService, async (req, res) => {
       });
     }
 
-    const result = await req.ethereumService.withdrawHTLC(contractId, preimage);
+    // Convert contractId to bytes32 if it's a string
+    const ethers = require('ethers');
+    const hashedContractId = ethers.keccak256(ethers.toUtf8Bytes(contractId));
+
+    const result = await req.ethereumService.withdrawHTLC(
+      hashedContractId,
+      preimage
+    );
 
     res.json({
       success: true,
@@ -302,4 +329,266 @@ router.post('/withdraw-htlc', getEthereumService, async (req, res) => {
   }
 });
 
-module.exports = { router, setEthereumService };
+/**
+ * @route POST /api/bridge/initiate-swap
+ * @desc Initiate a cross-chain swap
+ * @access Public
+ */
+router.post('/initiate-swap', getCoordinatorService, async (req, res) => {
+  try {
+    const {
+      swapId,
+      fromChain,
+      toChain,
+      fromAsset,
+      toAsset,
+      fromAmount,
+      toAmount,
+      fromAddress,
+      toAddress,
+      timelock,
+    } = req.body;
+
+    if (
+      !swapId ||
+      !fromChain ||
+      !toChain ||
+      !fromAsset ||
+      !toAsset ||
+      !fromAmount ||
+      !toAmount ||
+      !fromAddress ||
+      !toAddress
+    ) {
+      return res.status(400).json({
+        success: false,
+        error:
+          'Missing required fields: swapId, fromChain, toChain, fromAsset, toAsset, fromAmount, toAmount, fromAddress, toAddress',
+      });
+    }
+
+    const result = await req.coordinatorService.initiateSwap({
+      swapId,
+      fromChain,
+      toChain,
+      fromAsset,
+      toAsset,
+      fromAmount,
+      toAmount,
+      fromAddress,
+      toAddress,
+      timelock,
+    });
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    logger.error('Failed to initiate swap', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to initiate swap',
+    });
+  }
+});
+
+/**
+ * @route POST /api/bridge/create-source-htlc
+ * @desc Create HTLC on source chain
+ * @access Public
+ */
+router.post('/create-source-htlc', getCoordinatorService, async (req, res) => {
+  try {
+    const { swapId } = req.body;
+
+    if (!swapId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required field: swapId',
+      });
+    }
+
+    const result = await req.coordinatorService.createSourceHTLC(swapId);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    logger.error('Failed to create source HTLC', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create source HTLC',
+    });
+  }
+});
+
+/**
+ * @route POST /api/bridge/create-destination-htlc
+ * @desc Create HTLC on destination chain
+ * @access Public
+ */
+router.post(
+  '/create-destination-htlc',
+  getCoordinatorService,
+  async (req, res) => {
+    try {
+      const { swapId } = req.body;
+
+      if (!swapId) {
+        return res.status(400).json({
+          success: false,
+          error: 'Missing required field: swapId',
+        });
+      }
+
+      const result = await req.coordinatorService.createDestinationHTLC(swapId);
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      logger.error('Failed to create destination HTLC', {
+        error: error.message,
+      });
+      res.status(500).json({
+        success: false,
+        error: 'Failed to create destination HTLC',
+      });
+    }
+  }
+);
+
+/**
+ * @route POST /api/bridge/complete-swap
+ * @desc Complete a swap by withdrawing from destination HTLC
+ * @access Public
+ */
+router.post('/complete-swap', getCoordinatorService, async (req, res) => {
+  try {
+    const { swapId } = req.body;
+
+    if (!swapId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required field: swapId',
+      });
+    }
+
+    const result = await req.coordinatorService.completeSwap(swapId);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    logger.error('Failed to complete swap', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to complete swap',
+    });
+  }
+});
+
+/**
+ * @route POST /api/bridge/refund-swap
+ * @desc Refund a swap from source HTLC
+ * @access Public
+ */
+router.post('/refund-swap', getCoordinatorService, async (req, res) => {
+  try {
+    const { swapId } = req.body;
+
+    if (!swapId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required field: swapId',
+      });
+    }
+
+    const result = await req.coordinatorService.refundSwap(swapId);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    logger.error('Failed to refund swap', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to refund swap',
+    });
+  }
+});
+
+/**
+ * @route GET /api/bridge/swap/:swapId
+ * @desc Get swap details
+ * @access Public
+ */
+router.get('/swap/:swapId', getCoordinatorService, async (req, res) => {
+  try {
+    const { swapId } = req.params;
+
+    const result = req.coordinatorService.getSwap(swapId);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    logger.error('Failed to get swap details', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get swap details',
+    });
+  }
+});
+
+/**
+ * @route GET /api/bridge/swaps
+ * @desc Get all swaps
+ * @access Public
+ */
+router.get('/swaps', getCoordinatorService, async (req, res) => {
+  try {
+    const result = req.coordinatorService.getAllSwaps();
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    logger.error('Failed to get swaps', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get swaps',
+    });
+  }
+});
+
+/**
+ * @route GET /api/bridge/health
+ * @desc Get bridge coordinator health status
+ * @access Public
+ */
+router.get('/health', getCoordinatorService, async (req, res) => {
+  try {
+    const result = await req.coordinatorService.healthCheck();
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    logger.error('Failed to get bridge health', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get bridge health',
+    });
+  }
+});
+
+module.exports = { router, setEthereumService, setCoordinatorService };

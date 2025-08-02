@@ -16,6 +16,7 @@ const { connectRedis } = require('./config/redis');
 const {
   router: bridgeRoutes,
   setEthereumService: setBridgeEthereumService,
+  setCoordinatorService: setBridgeCoordinatorService,
 } = require('./routes/bridge.routes');
 const userRoutes = require('./routes/user.routes');
 const gameRoutes = require('./routes/game.routes');
@@ -42,6 +43,7 @@ const WebSocketService = require('./services/websocket.service');
 const MonitoringService = require('./services/monitoring.service');
 const EthereumService = require('./services/ethereum.service');
 const StellarService = require('./services/stellar.service');
+const CoordinatorService = require('./services/coordinator.service');
 
 const app = express();
 const server = http.createServer(app);
@@ -60,6 +62,10 @@ const webSocketService = new WebSocketService(io);
 const monitoringService = new MonitoringService();
 const ethereumService = new EthereumService();
 const stellarService = new StellarService();
+const coordinatorService = new CoordinatorService(
+  ethereumService,
+  stellarService
+);
 
 // Security middleware
 app.use(
@@ -231,9 +237,14 @@ async function startServer() {
     await stellarService.initialize();
     logger.info('Stellar service initialized successfully');
 
+    // Initialize Bridge Coordinator service
+    await coordinatorService.initialize();
+    logger.info('Bridge coordinator service initialized successfully');
+
     // Inject services into routes
     setEthereumService(ethereumService);
     setBridgeEthereumService(ethereumService);
+    setBridgeCoordinatorService(coordinatorService);
     setStellarService(stellarService);
     setStellarServiceForRoutes(stellarService);
 
@@ -281,7 +292,13 @@ async function startServer() {
 }
 
 // Export for testing
-module.exports = { app, server, ethereumService, stellarService };
+module.exports = {
+  app,
+  server,
+  ethereumService,
+  stellarService,
+  coordinatorService,
+};
 
 // Start the server if this file is run directly
 if (require.main === module) {

@@ -1,16 +1,35 @@
 const express = require('express');
+const router = express.Router();
 const logger = require('../utils/logger');
 
-const router = express.Router();
+// Service registry - will be injected
+let ethereumService = null;
+
+// Function to inject ethereum service
+function setEthereumService(service) {
+  ethereumService = service;
+}
+
+// Middleware to get ethereum service instance
+const getEthereumService = (req, res, next) => {
+  if (!ethereumService) {
+    return res.status(500).json({
+      success: false,
+      error: 'Ethereum service not available',
+    });
+  }
+  req.ethereumService = ethereumService;
+  next();
+};
 
 /**
- * Get swap quote
+ * GET /api/bridge/quote - Get quote for bridge swap
  */
 router.post('/quote', async (req, res) => {
   try {
-    logger.info('Bridge quote requested', { body: req.body });
+    logger.info('Bridge quote request received', { body: req.body });
 
-    // TODO: Implement actual quote logic
+    // For now, return a stub response
     res.json({
       success: true,
       message: 'Bridge quote endpoint - NOT YET IMPLEMENTED',
@@ -32,17 +51,19 @@ router.post('/quote', async (req, res) => {
 });
 
 /**
- * Initiate bridge swap
+ * POST /api/bridge/initiate - Initiate bridge swap
  */
 router.post('/initiate', async (req, res) => {
   try {
-    logger.info('Bridge initiate requested', { body: req.body });
+    logger.info('Bridge initiate request received', { body: req.body });
 
-    // TODO: Implement actual bridge initiation logic
+    // Generate stub swap ID
+    const swapId = `stub-swap-id-${Date.now()}`;
+
     res.json({
       success: true,
       message: 'Bridge initiate endpoint - NOT YET IMPLEMENTED',
-      swapId: 'stub-swap-id-' + Date.now(),
+      swapId,
       status: 'stub',
     });
   } catch (error) {
@@ -55,14 +76,13 @@ router.post('/initiate', async (req, res) => {
 });
 
 /**
- * Get swap status
+ * GET /api/bridge/status/:id - Get swap status
  */
 router.get('/status/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    logger.info('Bridge status requested', { swapId: id });
+    logger.info('Bridge status request received', { swapId: id });
 
-    // TODO: Implement actual status check logic
     res.json({
       success: true,
       message: 'Bridge status endpoint - NOT YET IMPLEMENTED',
@@ -83,13 +103,12 @@ router.get('/status/:id', async (req, res) => {
 });
 
 /**
- * Complete swap
+ * POST /api/bridge/complete - Complete bridge swap
  */
 router.post('/complete', async (req, res) => {
   try {
-    logger.info('Bridge complete requested', { body: req.body });
+    logger.info('Bridge complete request received', { body: req.body });
 
-    // TODO: Implement actual completion logic
     res.json({
       success: true,
       message: 'Bridge complete endpoint - NOT YET IMPLEMENTED',
@@ -104,4 +123,78 @@ router.post('/complete', async (req, res) => {
   }
 });
 
-module.exports = router;
+/**
+ * GET /api/bridge/test - Test contract interactions (development only)
+ */
+router.get('/test', getEthereumService, async (req, res) => {
+  try {
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(404).json({
+        success: false,
+        error: 'Test endpoint not available in production',
+      });
+    }
+
+    logger.info('Testing contract interactions...');
+
+    // Test contract interactions
+    const testResults = await req.ethereumService.testContractInteractions();
+
+    // Get network info
+    const networkInfo = await req.ethereumService.getNetworkInfo();
+
+    // Get current block
+    const currentBlock = await req.ethereumService.getCurrentBlock();
+
+    res.json({
+      success: true,
+      message: 'Contract interaction test completed',
+      data: {
+        network: networkInfo,
+        currentBlock,
+        contracts: testResults,
+        timestamp: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    logger.error('Contract test error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * GET /api/bridge/contracts - Get contract information
+ */
+router.get('/contracts', getEthereumService, async (req, res) => {
+  try {
+    const config = req.ethereumService.config;
+
+    res.json({
+      success: true,
+      message: 'Contract information retrieved',
+      data: {
+        network: config.network,
+        chainId: config.networkConfig.chainId,
+        addresses: config.addresses,
+        contracts: Object.keys(config.contracts).reduce((acc, key) => {
+          acc[key] = {
+            address: config.contracts[key].address,
+            hasABI: !!config.contracts[key].abi,
+          };
+          return acc;
+        }, {}),
+      },
+    });
+  } catch (error) {
+    logger.error('Contract info error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+module.exports = { router, setEthereumService };

@@ -224,3 +224,6 @@ ssl/
 *private*
 *secret*
 private_keys/ 
+
+artifacts/
+cache/

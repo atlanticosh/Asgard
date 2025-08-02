@@ -13,11 +13,17 @@ const { connectDatabase } = require('./config/database');
 const { connectRedis } = require('./config/redis');
 
 // Import routes
-const bridgeRoutes = require('./routes/bridge.routes');
+const {
+  router: bridgeRoutes,
+  setEthereumService: setBridgeEthereumService,
+} = require('./routes/bridge.routes');
 const userRoutes = require('./routes/user.routes');
 const gameRoutes = require('./routes/game.routes');
 const analyticsRoutes = require('./routes/analytics.routes');
-const healthRoutes = require('./routes/health.routes');
+const {
+  router: healthRoutes,
+  setEthereumService,
+} = require('./routes/health.routes');
 
 // Import middleware
 const {
@@ -29,6 +35,7 @@ const { authenticateToken } = require('./middleware/auth.middleware');
 // Import services
 const WebSocketService = require('./services/websocket.service');
 const MonitoringService = require('./services/monitoring.service');
+const EthereumService = require('./services/ethereum.service');
 
 const app = express();
 const server = http.createServer(app);
@@ -45,6 +52,7 @@ const io = socketIo(server, {
 // Initialize services
 const webSocketService = new WebSocketService(io);
 const monitoringService = new MonitoringService();
+const ethereumService = new EthereumService();
 
 // Security middleware
 app.use(
@@ -207,6 +215,14 @@ async function startServer() {
     await connectRedis();
     logger.info('Redis connected successfully');
 
+    // Initialize Ethereum service
+    await ethereumService.initialize();
+    logger.info('Ethereum service initialized successfully');
+
+    // Inject Ethereum service into routes
+    setEthereumService(ethereumService);
+    setBridgeEthereumService(ethereumService);
+
     // Start monitoring services
     await monitoringService.start();
     logger.info('Monitoring services started');
@@ -251,7 +267,7 @@ async function startServer() {
 }
 
 // Export for testing
-module.exports = { app, server };
+module.exports = { app, server, ethereumService };
 
 // Start the server if this file is run directly
 if (require.main === module) {

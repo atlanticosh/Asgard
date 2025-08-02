@@ -1,0 +1,39 @@
+# Project specific
+/tests/
+/docs/
+*.md
+
+# Dependencies
+node_modules/
+.env
+
+# Build outputs
+/dist/
+/build/
+/out/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Hardhat
+cache/
+artifacts/
+
+# Misc
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

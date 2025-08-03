@@ -21,6 +21,7 @@ const {
 const userRoutes = require('./routes/user.routes');
 const gameRoutes = require('./routes/game.routes');
 const analyticsRoutes = require('./routes/analytics.routes');
+const profileRoutes = require('./routes/profile.routes');
 const {
   router: healthRoutes,
   setEthereumService,
@@ -152,6 +153,7 @@ app.use('/api/bridge', bridgeRoutes);
 app.use('/api/user', authenticateToken, userRoutes);
 app.use('/api/game', authenticateToken, gameRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/profile', profileRoutes);
 app.use('/api/stellar', stellarRoutes);
 
 // WebSocket connection handling

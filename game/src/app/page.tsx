@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useGameStore } from '@/stores/gameStore';
 import { walletService } from '@/services/walletService';
+import './home.css';
 
 export default function HomePage() {
   const { 
@@ -95,7 +96,7 @@ export default function HomePage() {
       </div>
 
       {/* Game Layout */}
-      <div className="relative z-10 h-screen flex flex-col">
+      <div className="relative z-10 home-layout">
         
         {/* Top Game Bar */}
         <motion.div 
@@ -180,11 +181,11 @@ export default function HomePage() {
         </motion.div>
 
         {/* Main Game Area */}
-        <div className="flex-1 flex">
+        <div className="home-main-content">
           
           {/* Left Sidebar - Game Navigation */}
           <motion.div 
-            className="w-80 bg-old-paper border-r-4 border-vintage-brown p-6"
+            className="home-sidebar"
             initial={{ x: -320 }}
             animate={{ x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -193,57 +194,58 @@ export default function HomePage() {
               GAME MENU
             </h2>
             
-            <div className="space-y-4">
+            <div className="home-nav-menu">
               <motion.button
-                className="w-full vintage-stat p-4 text-left hover:scale-105 transition-transform"
+                className="home-nav-item"
                 whileHover={{ x: 10 }}
                 onClick={() => window.location.href = '/city'}
               >
                 <div className="flex items-center gap-3">
-                  <Map className="w-6 h-6 text-forest-green" />
+                  <Map className="home-nav-icon text-forest-green" />
                   <div>
-                    <div className="vintage-subtitle text-sm text-charcoal">CITY</div>
-                    <div className="vintage-text text-xs text-charcoal">Explore the digital realm</div>
+                    <div className="home-nav-title">CITY</div>
+                    <div className="home-nav-description">Explore the digital realm</div>
                   </div>
                 </div>
               </motion.button>
 
               <motion.button
-                className="w-full vintage-stat p-4 text-left hover:scale-105 transition-transform"
+                className="home-nav-item"
                 whileHover={{ x: 10 }}
                 onClick={() => window.location.href = '/marketplace'}
               >
                 <div className="flex items-center gap-3">
-                  <Store className="w-6 h-6 text-aged-yellow" />
+                  <Store className="home-nav-icon text-aged-yellow" />
                   <div>
-                    <div className="vintage-subtitle text-sm text-charcoal">MARKETPLACE</div>
-                    <div className="vintage-text text-xs text-charcoal">Trade and bridge assets</div>
+                    <div className="home-nav-title">MARKETPLACE</div>
+                    <div className="home-nav-description">Trade and bridge assets</div>
                   </div>
                 </div>
               </motion.button>
 
               <motion.button
-                className="w-full vintage-stat p-4 text-left hover:scale-105 transition-transform"
+                className="home-nav-item"
                 whileHover={{ x: 10 }}
               >
                 <div className="flex items-center gap-3">
-                  <Gamepad2 className="w-6 h-6 text-rust-red" />
+                  <Gamepad2 className="home-nav-icon text-rust-red" />
                   <div>
-                    <div className="vintage-subtitle text-sm text-charcoal">ARENA</div>
-                    <div className="vintage-text text-xs text-charcoal">Battle other survivors</div>
+                    <div className="home-nav-title">ARENA</div>
+                    <div className="home-nav-description">Battle other survivors</div>
                   </div>
                 </div>
               </motion.button>
 
               <motion.button
-                className="w-full vintage-stat p-4 text-left hover:scale-105 transition-transform"
+                className="home-nav-item"
                 whileHover={{ x: 10 }}
+                onClick={() => window.location.href = '/profile'}
               >
                 <div className="flex items-center gap-3">
-                  <BarChart3 className="w-6 h-6 text-vintage-brown" />
+                  <User className="home-nav-icon text-vintage-brown" />
                   <div>
-                    <div className="vintage-subtitle text-sm text-charcoal">LEADERBOARD</div>
-                    <div className="vintage-text text-xs text-charcoal">View rankings</div>
+                    <div className="home-nav-title">PROFILE</div>
+                    <div className="home-nav-description">View your dashboard</div>
                   </div>
                 </div>
               </motion.button>
@@ -252,60 +254,64 @@ export default function HomePage() {
             {/* Player Stats */}
             {isConnected && player && (
               <motion.div 
-                className="mt-8 vintage-stat p-4"
+                className="home-player-stats"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
               >
-                <h3 className="vintage-subtitle text-sm mb-3 text-vintage-brown">
+                <h3 className="home-stats-title">
                   YOUR STATS
                 </h3>
                 <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="vintage-text text-xs text-charcoal">Level:</span>
-                    <span className="vintage-text text-xs text-forest-green">{player.level}</span>
+                  <div className="home-stats-row">
+                    <span className="home-stats-label">Level:</span>
+                    <span className="home-stats-value level">{player.level}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="vintage-text text-xs text-charcoal">XP:</span>
-                    <span className="vintage-text text-xs text-aged-yellow">{player.xp}</span>
+                  <div className="home-stats-row">
+                    <span className="home-stats-label">XP:</span>
+                    <span className="home-stats-value xp">{player.xp}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="vintage-text text-xs text-charcoal">Credits:</span>
-                    <span className="vintage-text text-xs text-rust-red">{player.survivalCredits}</span>
+                  <div className="home-stats-row">
+                    <span className="home-stats-label">Credits:</span>
+                    <span className="home-stats-value credits">{player.survivalCredits}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="vintage-text text-xs text-charcoal">Rank:</span>
-                    <span className="vintage-text text-xs text-vintage-brown">#{player.rank}</span>
+                  <div className="home-stats-row">
+                    <span className="home-stats-label">Rank:</span>
+                    <span className="home-stats-value rank">#{player.rank}</span>
                   </div>
                 </div>
               </motion.div>
             )}
           </motion.div>
 
-          {/* Main Content Area */}
-          <div className="flex-1 p-8">
+                            {/* Main Content Area */}
+          <div className="home-content-area">
             
             {/* Welcome Section */}
             <motion.div 
-              className="crushed-paper p-8 mb-8 coffee-stain"
+              className="home-welcome coffee-stain"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.8 }}
             >
-              <h2 className="vintage-subtitle text-2xl mb-4 text-vintage-brown">
+              <h2 className="home-welcome-title">
                 WELCOME TO ASGARD
               </h2>
-              <p className="vintage-text text-lg leading-relaxed mb-6">
+              <p className="home-welcome-text">
                 The crypto world has collapsed into chaos. Multiple blockchain networks are isolated, 
                 and resources are scarce. Asgard has become the last refuge for crypto survivors. 
                 Only the smartest traders and bridge masters can survive.
+              </p>
+              <p className="home-welcome-text text-charcoal">
+                Navigate through treacherous markets, master cross-chain bridging, and compete with thousands 
+                of survivors in this ultimate DeFi survival challenge.
               </p>
               
               {!isConnected ? (
                 <div className="flex gap-4">
                   <button 
                     onClick={handleConnectWallet}
-                    className="vintage-button px-6 py-3 text-lg"
+                    className="home-button"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -322,13 +328,13 @@ export default function HomePage() {
                 <div className="flex gap-4">
                   <button 
                     onClick={() => window.location.href = '/city'}
-                    className="vintage-button px-6 py-3 text-lg"
+                    className="home-button"
                   >
                     <Sword className="w-5 h-5 inline mr-2" />
                     ENTER THE CITY
                   </button>
                   <button 
-                    className="vintage-button px-6 py-3 text-lg"
+                    className="home-button"
                     style={{ 
                       background: 'linear-gradient(45deg, #c0392b, #8b4513)',
                       borderColor: '#1a1a1a'
@@ -343,51 +349,97 @@ export default function HomePage() {
 
             {/* Game Features Grid */}
             <motion.div 
-              className="grid grid-cols-2 gap-6"
+              className="home-features-grid"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.8 }}
             >
               <motion.div 
-                className="crushed-paper p-6 ink-blot"
+                className="home-feature-card ink-blot"
                 whileHover={{ scale: 1.05, rotateY: 5 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <Zap className="w-12 h-12 mb-4 text-rust-red" />
-                <h3 className="vintage-subtitle text-lg mb-2">REAL DEFI TRADING</h3>
-                <p className="vintage-text text-sm">Trade real assets with 1inch integration</p>
+                <Zap className="home-feature-icon text-rust-red" />
+                <h3 className="home-feature-title">REAL DEFI TRADING</h3>
+                <p className="home-feature-description">Trade real assets with 1inch integration</p>
               </motion.div>
 
               <motion.div 
-                className="crushed-paper p-6 ink-blot"
+                className="home-feature-card ink-blot"
                 whileHover={{ scale: 1.05, rotateY: 5 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <Shield className="w-12 h-12 mb-4 text-forest-green" />
-                <h3 className="vintage-subtitle text-lg mb-2">CROSS-CHAIN BRIDGE</h3>
-                <p className="vintage-text text-sm">Seamless Ethereum ↔ Stellar swaps</p>
+                <Shield className="home-feature-icon text-forest-green" />
+                <h3 className="home-feature-title">CROSS-CHAIN BRIDGE</h3>
+                <p className="home-feature-description">Seamless Ethereum ↔ Stellar swaps</p>
               </motion.div>
 
               <motion.div 
-                className="crushed-paper p-6 ink-blot"
+                className="home-feature-card ink-blot"
                 whileHover={{ scale: 1.05, rotateY: 5 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <Gamepad2 className="w-12 h-12 mb-4 text-aged-yellow" />
-                <h3 className="vintage-subtitle text-lg mb-2">INTERACTIVE GAMEPLAY</h3>
-                <p className="vintage-text text-sm">Skill-based mini-games and challenges</p>
+                <Gamepad2 className="home-feature-icon text-aged-yellow" />
+                <h3 className="home-feature-title">INTERACTIVE GAMEPLAY</h3>
+                <p className="home-feature-description">Skill-based mini-games and challenges</p>
               </motion.div>
 
               <motion.div 
-                className="crushed-paper p-6 ink-blot"
+                className="home-feature-card ink-blot"
                 whileHover={{ scale: 1.05, rotateY: 5 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <Crown className="w-12 h-12 mb-4 text-vintage-brown" />
-                <h3 className="vintage-subtitle text-lg mb-2">COMPETITIVE SURVIVAL</h3>
-                <p className="vintage-text text-sm">Compete with 1,000+ players globally</p>
+                <Crown className="home-feature-icon text-vintage-brown" />
+                <h3 className="home-feature-title">COMPETITIVE SURVIVAL</h3>
+                <p className="home-feature-description">Compete with 1,000+ players globally</p>
               </motion.div>
             </motion.div>
+
+            {/* Additional Game Info Section */}
+            <motion.div 
+              className="home-game-info"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.8 }}
+            >
+              <motion.div 
+                className="home-info-card"
+                whileHover={{ scale: 1.05, rotateY: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <Target className="home-info-icon text-rust-red" />
+                <h3 className="home-info-title">DAILY CHALLENGES</h3>
+                <p className="home-info-description">Complete daily trading challenges to earn XP and credits</p>
+                <div className="home-info-value">3/5</div>
+                <div className="home-info-label">COMPLETED TODAY</div>
+              </motion.div>
+
+              <motion.div 
+                className="home-info-card"
+                whileHover={{ scale: 1.05, rotateY: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <Flame className="home-info-icon text-aged-yellow" />
+                <h3 className="home-info-title">STREAK BONUS</h3>
+                <p className="home-info-description">Maintain daily activity for bonus rewards</p>
+                <div className="home-info-value">7</div>
+                <div className="home-info-label">DAY STREAK</div>
+              </motion.div>
+
+              <motion.div 
+                className="home-info-card"
+                whileHover={{ scale: 1.05, rotateY: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <Skull className="home-info-icon text-vintage-brown" />
+                <h3 className="home-info-title">SURVIVAL RANK</h3>
+                <p className="home-info-description">Your position among all survivors</p>
+                <div className="home-info-value">#847</div>
+                <div className="home-info-label">TOP 10%</div>
+              </motion.div>
+            </motion.div>
+
+
           </div>
         </div>
 

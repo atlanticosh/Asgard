@@ -1,14 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Map, 
   Store, 
   Gamepad2, 
-  BarChart3, 
   User, 
-  Menu, 
   Sword,
   Shield,
   Zap,
@@ -16,15 +14,12 @@ import {
   Building2,
   Users,
   Target,
-  Flame,
-  Skull,
   Coins,
-  Gem,
-  Heart,
-  Star,
-  ArrowLeft
+  ArrowLeft,
+  BookOpen
 } from 'lucide-react';
 import { useGameStore } from '@/stores/gameStore';
+import './city.css';
 
 export default function CityPage() {
   const { 
@@ -35,40 +30,122 @@ export default function CityPage() {
     addCredits
   } = useGameStore();
   
-  const [currentLocation, setCurrentLocation] = useState('plaza');
-  const [showInventory, setShowInventory] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<any>(null);
+  const [showSidePanel, setShowSidePanel] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [modalContent, setModalContent] = useState<any>(null);
   const [gameEvents, setGameEvents] = useState([
     { id: 1, type: 'trade', title: 'Arbitrage Opportunity', reward: 50, location: 'marketplace' },
     { id: 2, type: 'battle', title: 'Bridge Challenge', reward: 100, location: 'arena' },
     { id: 3, type: 'quest', title: 'Cross-Chain Mastery', reward: 200, location: 'tower' },
   ]);
 
-  const locations = {
-    plaza: {
+  const cityBuildings = [
+    {
+      id: 'plaza',
       name: 'ASGARD PLAZA',
       description: 'The central hub of the digital realm. Survivors gather here to trade information and form alliances.',
-      features: ['Marketplace', 'Arena', 'Tower', 'Safe Zone']
+      features: ['Marketplace', 'Arena', 'Tower', 'Safe Zone'],
+      icon: Map,
+      level: 1,
+      available: true,
+      color: 'text-forest-green'
     },
-    marketplace: {
+    {
+      id: 'marketplace',
       name: 'DEFI MARKETPLACE',
       description: 'A bustling trading floor where survivors exchange assets across chains. The air crackles with opportunity.',
-      features: ['Swap Interface', 'Bridge Terminal', 'Price Feeds', 'Trading Pairs']
+      features: ['Swap Interface', 'Bridge Terminal', 'Price Feeds', 'Trading Pairs'],
+      icon: Store,
+      level: 2,
+      available: true,
+      color: 'text-aged-yellow'
     },
-    arena: {
+    {
+      id: 'arena',
       name: 'SURVIVAL ARENA',
       description: 'Where the strongest traders prove their worth. Only the smartest survive the challenges.',
-      features: ['PvP Battles', 'Skill Challenges', 'Leaderboards', 'Rewards']
+      features: ['PvP Battles', 'Skill Challenges', 'Leaderboards', 'Rewards'],
+      icon: Gamepad2,
+      level: 1,
+      available: true,
+      color: 'text-rust-red'
     },
-    tower: {
+    {
+      id: 'tower',
       name: 'BRIDGE TOWER',
       description: 'The highest point in Asgard. Master the art of cross-chain bridging to ascend.',
-      features: ['Bridge Tutorials', 'Advanced Swaps', 'Chain Analytics', 'Mastery Tests']
+      features: ['Bridge Tutorials', 'Advanced Swaps', 'Chain Analytics', 'Mastery Tests'],
+      icon: Building2,
+      level: 3,
+      available: true,
+      color: 'text-vintage-brown'
+    },
+    {
+      id: 'factory',
+      name: 'CROSS-CHAIN FACTORY',
+      description: 'Where new bridges are forged and old ones are maintained. The heart of inter-chain commerce.',
+      features: ['Bridge Construction', 'Chain Integration', 'Security Protocols', 'Factory Upgrades'],
+      icon: Zap,
+      level: 0,
+      available: false,
+      color: 'text-charcoal'
+    },
+    {
+      id: 'library',
+      name: 'KNOWLEDGE LIBRARY',
+      description: 'Ancient scrolls and modern protocols coexist. Learn the secrets of DeFi survival.',
+      features: ['Trading Guides', 'Bridge Manuals', 'Strategy Books', 'Historical Data'],
+      icon: BookOpen,
+      level: 0,
+      available: false,
+      color: 'text-faded-blue'
+    },
+    {
+      id: 'barracks',
+      name: 'TRADER BARRACKS',
+      description: 'Train your trading skills and prepare for the ultimate survival challenges.',
+      features: ['Skill Training', 'Combat Prep', 'Team Formation', 'Strategy Planning'],
+      icon: Users,
+      level: 0,
+      available: false,
+      color: 'text-forest-green'
+    },
+    {
+      id: 'treasury',
+      name: 'CITY TREASURY',
+      description: 'The vault where all city resources are stored and managed.',
+      features: ['Resource Storage', 'Tax Collection', 'City Funding', 'Economic Control'],
+      icon: Coins,
+      level: 0,
+      available: false,
+      color: 'text-aged-yellow'
+    },
+    {
+      id: 'gate',
+      name: 'CITY GATE',
+      description: 'The main entrance to Asgard. All travelers must pass through here.',
+      features: ['Access Control', 'Security Check', 'Visitor Log', 'Gate Maintenance'],
+      icon: Shield,
+      level: 0,
+      available: false,
+      color: 'text-rust-red'
     }
-  };
+  ];
 
-  const handleLocationChange = (location: string) => {
-    setCurrentLocation(location);
-    addXP(10); // Small XP gain for exploring
+  const handleBuildingClick = (building: any) => {
+    if (!building.available) {
+      setModalContent({
+        title: 'BUILDING LOCKED',
+        content: `This building requires level ${building.level} to unlock. Continue your journey to unlock more of Asgard!`
+      });
+      setShowModal(true);
+      return;
+    }
+
+    setSelectedLocation(building);
+    setShowSidePanel(true);
+    addXP(10);
   };
 
   const handleEventComplete = (eventId: number) => {
@@ -80,6 +157,68 @@ export default function CityPage() {
     }
   };
 
+  const handleCloseSidePanel = () => {
+    setShowSidePanel(false);
+    setSelectedLocation(null);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setModalContent(null);
+  };
+
+  const handleNavigateToLocation = (locationId: string) => {
+    if (locationId === 'marketplace') {
+      window.location.href = '/marketplace';
+    } else {
+      const building = cityBuildings.find(b => b.id === locationId);
+      if (building) {
+        handleBuildingClick(building);
+      }
+    }
+  };
+
+  const handleExplore = () => {
+    if (!selectedLocation) return;
+    
+    // Generate random exploration events based on location
+    const explorationEvents = {
+      plaza: [
+        { title: 'Found Hidden Passage', reward: 25, description: 'You discovered a secret tunnel leading to ancient DeFi knowledge.' },
+        { title: 'Met Fellow Survivor', reward: 30, description: 'A trader shared valuable insights about cross-chain strategies.' },
+        { title: 'Found Old Scrolls', reward: 20, description: 'Ancient trading manuals reveal forgotten techniques.' }
+      ],
+      marketplace: [
+        { title: 'Price Arbitrage', reward: 40, description: 'You spotted a price difference and made a quick profit.' },
+        { title: 'Network Discovery', reward: 35, description: 'Found a new bridge route with better rates.' },
+        { title: 'Trading Opportunity', reward: 30, description: 'Identified a profitable swap opportunity.' }
+      ],
+      arena: [
+        { title: 'Combat Training', reward: 45, description: 'Improved your trading reflexes and strategy.' },
+        { title: 'Weapon Upgrade', reward: 35, description: 'Enhanced your trading tools and techniques.' },
+        { title: 'Battle Experience', reward: 40, description: 'Gained valuable combat experience.' }
+      ],
+      tower: [
+        { title: 'Bridge Mastery', reward: 50, description: 'Advanced your cross-chain bridging skills.' },
+        { title: 'Chain Analysis', reward: 35, description: 'Learned to analyze blockchain networks.' },
+        { title: 'Security Protocol', reward: 40, description: 'Mastered advanced security techniques.' }
+      ]
+    };
+
+    const events = explorationEvents[selectedLocation.id as keyof typeof explorationEvents] || explorationEvents.plaza;
+    const randomEvent = events[Math.floor(Math.random() * events.length)];
+    
+    setModalContent({
+      title: 'EXPLORATION COMPLETE',
+      content: `${randomEvent.description} You gained ${randomEvent.reward} XP and ${randomEvent.reward * 2} credits for your discovery!`,
+      reward: randomEvent.reward
+    });
+    
+    addXP(randomEvent.reward);
+    addCredits(randomEvent.reward * 2);
+    setShowModal(true);
+  };
+
   if (!isConnected) {
     return (
       <div className="min-h-screen bg-old-paper flex items-center justify-center">
@@ -87,7 +226,7 @@ export default function CityPage() {
           <h2 className="vintage-subtitle text-2xl mb-4 text-rust-red">ACCESS DENIED</h2>
           <p className="vintage-text mb-6">You must connect your wallet to enter the city.</p>
           <button 
-            onClick={() => setCurrentView('home')}
+            onClick={() => window.location.href = '/'}
             className="vintage-button px-6 py-3"
           >
             <ArrowLeft className="w-5 h-5 inline mr-2" />
@@ -99,11 +238,9 @@ export default function CityPage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background */}
+    <div className="city-layout">
       <div className="absolute inset-0 vintage-grid"></div>
       
-      {/* Coffee Stains */}
       <div className="absolute top-20 left-10 w-32 h-32 opacity-20">
         <div className="w-full h-full bg-coffee-stain rounded-full transform rotate-12"></div>
       </div>
@@ -111,312 +248,181 @@ export default function CityPage() {
         <div className="w-full h-full bg-coffee-stain rounded-full transform -rotate-45"></div>
       </div>
 
-      {/* Game Layout */}
       <div className="relative z-10 h-screen flex flex-col">
         
-        {/* Top Game Bar */}
         <motion.div 
           className="crushed-paper border-b-4 border-vintage-brown p-4"
           initial={{ y: -100 }}
           animate={{ y: 0 }}
+          transition={{ duration: 0.8 }}
         >
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <button 
-                onClick={() => setCurrentView('home')}
+                onClick={() => window.location.href = '/'}
                 className="vintage-button px-3 py-1 text-xs"
               >
                 <ArrowLeft className="w-4 h-4" />
               </button>
-              <h1 className="vintage-title text-2xl">ASGARD CITY</h1>
+              <motion.h1 
+                className="vintage-title text-2xl flicker"
+                initial={{ scale: 0.5 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 1.5, type: "spring" }}
+              >
+                ASGARD CITY
+              </motion.h1>
               <span className="vintage-subtitle text-sm text-rust-red">
-                {locations[currentLocation as keyof typeof locations].name}
+                {selectedLocation ? selectedLocation.name : 'CITY MAP'}
               </span>
             </div>
 
             <div className="flex items-center gap-6">
               <div className="text-center">
-                <div className="text-xl text-forest-green vintage-text">{player?.level || 1}</div>
+                <div className="text-2xl text-forest-green vintage-text">{player?.level || 5}</div>
                 <div className="text-xs text-charcoal vintage-text">LEVEL</div>
               </div>
               <div className="text-center">
-                <div className="text-xl text-aged-yellow vintage-text">{player?.xp || 0}</div>
+                <div className="text-2xl text-aged-yellow vintage-text">{player?.xp || 460}</div>
                 <div className="text-xs text-charcoal vintage-text">XP</div>
               </div>
               <div className="text-center">
-                <div className="text-xl text-rust-red vintage-text">{player?.survivalCredits || 0}</div>
+                <div className="text-2xl text-rust-red vintage-text">{player?.survivalCredits || 1700}</div>
                 <div className="text-xs text-charcoal vintage-text">CREDITS</div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <User className="w-5 h-5 text-vintage-brown" />
-              <span className="vintage-text text-sm text-charcoal">
-                {player?.username || 'Survivor'}
-              </span>
-              <div className="vintage-stat px-3 py-1">
-                <span className="terminal-text text-xs">
-                  {player?.walletAddress ? 
-                    `${player.walletAddress.slice(0, 6)}...${player.walletAddress.slice(-4)}` : 
-                    '0x0000...0000'
-                  }
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <User className="w-5 h-5 text-vintage-brown" />
+                <span className="vintage-text text-sm text-charcoal">
+                  {player?.username || 'CryptoSurvivor_168'}
                 </span>
+                <div className="vintage-stat px-3 py-1">
+                  <span className="terminal-text text-xs">
+                    {player?.walletAddress ? 
+                      `${player.walletAddress.slice(0, 6)}...${player.walletAddress.slice(-4)}` : 
+                      '0x6f21...9f8e'
+                    }
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Main Game Area */}
-        <div className="flex-1 flex">
+        <div className="city-main-content">
           
-          {/* Left Sidebar - Navigation */}
-          <div className="w-80 bg-old-paper border-r-4 border-vintage-brown p-6">
-            <h2 className="vintage-subtitle text-lg mb-6 text-vintage-brown">
-              LOCATIONS
-            </h2>
+          <div className="city-map-area">
+            <div className="city-map-background"></div>
             
-            <div className="space-y-4">
-              {Object.entries(locations).map(([key, location]) => (
-                <motion.button
-                  key={key}
-                  className={`w-full vintage-stat p-4 text-left hover:scale-105 transition-transform ${
-                    currentLocation === key ? 'border-2 border-forest-green' : ''
-                  }`}
-                  whileHover={{ x: 10 }}
-                  onClick={() => handleLocationChange(key)}
-                >
-                  <div className="flex items-center gap-3">
-                    {key === 'plaza' && <Map className="w-6 h-6 text-forest-green" />}
-                    {key === 'marketplace' && <Store className="w-6 h-6 text-aged-yellow" />}
-                    {key === 'arena' && <Gamepad2 className="w-6 h-6 text-rust-red" />}
-                    {key === 'tower' && <Building2 className="w-6 h-6 text-vintage-brown" />}
-                    <div>
-                      <div className="vintage-subtitle text-sm text-charcoal">{location.name}</div>
-                      <div className="vintage-text text-xs text-charcoal">{location.description}</div>
-                    </div>
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-
-            {/* Active Events */}
-            <div className="mt-8">
-              <h3 className="vintage-subtitle text-sm mb-3 text-vintage-brown">
-                ACTIVE EVENTS
-              </h3>
-              <div className="space-y-2">
-                {gameEvents.map(event => (
-                  <motion.div 
-                    key={event.id}
-                    className="vintage-stat p-3 text-xs"
-                    whileHover={{ scale: 1.02 }}
+            <div className="city-buildings">
+              {cityBuildings.map((building, index) => {
+                const IconComponent = building.icon;
+                return (
+                  <motion.div
+                    key={building.id}
+                    className={`city-building ${building.available ? 'available' : 'locked'}`}
+                    whileHover={{ scale: building.available ? 1.05 : 1 }}
+                    onClick={() => handleBuildingClick(building)}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.1, duration: 0.5 }}
                   >
-                    <div className="flex justify-between items-center">
-                      <span className="vintage-text text-charcoal">{event.title}</span>
-                      <button 
-                        onClick={() => handleEventComplete(event.id)}
-                        className="vintage-button px-2 py-1 text-xs"
-                      >
-                        +{event.reward} XP
-                      </button>
-                    </div>
+                    <IconComponent className={`city-building-icon ${building.color}`} />
+                    <div className="city-building-title">{building.name}</div>
+                    <div className="city-building-level">Level {building.level}</div>
                   </motion.div>
-                ))}
-              </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Main Content Area */}
-          <div className="flex-1 p-8 overflow-y-auto">
-            
-            {/* Location Description */}
-            <motion.div 
-              className="crushed-paper p-8 mb-8 coffee-stain"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <h2 className="vintage-subtitle text-2xl mb-4 text-vintage-brown">
-                {locations[currentLocation as keyof typeof locations].name}
-              </h2>
-              <p className="vintage-text text-lg leading-relaxed mb-6">
-                {locations[currentLocation as keyof typeof locations].description}
-              </p>
-              
-              <div className="grid grid-cols-2 gap-4">
-                {locations[currentLocation as keyof typeof locations].features.map((feature, index) => (
-                  <motion.div 
-                    key={index}
-                    className="vintage-stat p-4 text-center"
-                    whileHover={{ scale: 1.05 }}
+          <motion.div 
+            className={`city-side-panel ${showSidePanel ? 'open' : ''}`}
+            initial={{ width: 0 }}
+            animate={{ width: showSidePanel ? 400 : 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            {showSidePanel && selectedLocation && (
+              <div className="city-side-panel-content">
+                <div className="city-side-panel-header">
+                  <h2 className="city-side-panel-title">{selectedLocation.name}</h2>
+                  <button 
+                    className="city-side-panel-close"
+                    onClick={handleCloseSidePanel}
                   >
-                    <div className="vintage-text text-sm text-charcoal">{feature}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Location-Specific Content */}
-            {currentLocation === 'plaza' && (
-              <motion.div 
-                className="grid grid-cols-2 gap-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                <div className="crushed-paper p-6 ink-blot">
-                  <Users className="w-12 h-12 mb-4 text-forest-green" />
-                  <h3 className="vintage-subtitle text-lg mb-2">SURVIVORS ONLINE</h3>
-                  <p className="vintage-text text-sm">847 survivors currently in Asgard</p>
-                  <div className="mt-4 text-2xl text-forest-green vintage-text">847</div>
-                </div>
-
-                <div className="crushed-paper p-6 ink-blot">
-                  <Target className="w-12 h-12 mb-4 text-rust-red" />
-                  <h3 className="vintage-subtitle text-lg mb-2">DAILY CHALLENGES</h3>
-                  <p className="vintage-text text-sm">Complete challenges to earn rewards</p>
-                  <div className="mt-4 text-2xl text-rust-red vintage-text">3</div>
-                </div>
-
-                <div className="crushed-paper p-6 ink-blot">
-                  <Coins className="w-12 h-12 mb-4 text-aged-yellow" />
-                  <h3 className="vintage-subtitle text-lg mb-2">TOTAL PRIZE POOL</h3>
-                  <p className="vintage-text text-sm">Survive to claim your share</p>
-                  <div className="mt-4 text-2xl text-aged-yellow vintage-text">$50K</div>
-                </div>
-
-                <div className="crushed-paper p-6 ink-blot">
-                  <Flame className="w-12 h-12 mb-4 text-vintage-brown" />
-                  <h3 className="vintage-subtitle text-lg mb-2">DAYS REMAINING</h3>
-                  <p className="vintage-text text-sm">Time is running out</p>
-                  <div className="mt-4 text-2xl text-vintage-brown vintage-text">18</div>
-                </div>
-              </motion.div>
-            )}
-
-            {currentLocation === 'marketplace' && (
-              <motion.div 
-                className="space-y-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                <div className="crushed-paper p-6">
-                  <h3 className="vintage-subtitle text-xl mb-4 text-vintage-brown">TRADING INTERFACE</h3>
-                  <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="vintage-stat p-4 text-center">
-                      <div className="text-2xl text-forest-green vintage-text">ETH</div>
-                      <div className="text-sm text-charcoal vintage-text">$2,450.32</div>
-                    </div>
-                    <div className="vintage-stat p-4 text-center">
-                      <div className="text-2xl text-aged-yellow vintage-text">XLM</div>
-                      <div className="text-sm text-charcoal vintage-text">$0.12</div>
-                    </div>
-                    <div className="vintage-stat p-4 text-center">
-                      <div className="text-2xl text-rust-red vintage-text">USDC</div>
-                      <div className="text-sm text-charcoal vintage-text">$1.00</div>
-                    </div>
-                  </div>
-                  <button className="vintage-button px-6 py-3 w-full">
-                    <Zap className="w-5 h-5 inline mr-2" />
-                    OPEN SWAP INTERFACE
+                    ×
                   </button>
                 </div>
 
-                <div className="crushed-paper p-6">
-                  <h3 className="vintage-subtitle text-xl mb-4 text-vintage-brown">BRIDGE TERMINAL</h3>
-                  <p className="vintage-text mb-4">Cross-chain bridge between Ethereum and Stellar</p>
-                  <button className="vintage-button px-6 py-3 w-full">
-                    <Shield className="w-5 h-5 inline mr-2" />
-                    INITIATE BRIDGE SWAP
-                  </button>
-                </div>
-              </motion.div>
-            )}
-
-            {currentLocation === 'arena' && (
-              <motion.div 
-                className="space-y-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                <div className="crushed-paper p-6">
-                  <h3 className="vintage-subtitle text-xl mb-4 text-vintage-brown">BATTLE ARENA</h3>
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="vintage-stat p-4 text-center">
-                      <Sword className="w-8 h-8 mx-auto mb-2 text-rust-red" />
-                      <div className="vintage-text text-sm">PvP BATTLES</div>
-                    </div>
-                    <div className="vintage-stat p-4 text-center">
-                      <Target className="w-8 h-8 mx-auto mb-2 text-forest-green" />
-                      <div className="vintage-text text-sm">SKILL CHALLENGES</div>
-                    </div>
-                  </div>
-                  <button className="vintage-button px-6 py-3 w-full">
-                    <Gamepad2 className="w-5 h-5 inline mr-2" />
-                    ENTER BATTLE
-                  </button>
+                <div className="city-location-description">
+                  {selectedLocation.description}
                 </div>
 
-                <div className="crushed-paper p-6">
-                  <h3 className="vintage-subtitle text-xl mb-4 text-vintage-brown">LEADERBOARD</h3>
-                  <div className="space-y-2">
-                    {[1, 2, 3, 4, 5].map(rank => (
-                      <div key={rank} className="flex justify-between items-center vintage-stat p-3">
-                        <span className="vintage-text text-sm">#{rank} Survivor_{rank}</span>
-                        <span className="vintage-text text-sm text-aged-yellow">{1000 - rank * 50} XP</span>
+                <div className="city-location-features">
+                  <h3>FEATURES</h3>
+                  <ul className="city-feature-list">
+                    {selectedLocation.features.map((feature: string, index: number) => (
+                      <li key={index} className="city-feature-item">
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="city-events-section">
+                  <h3 className="city-events-title">ACTIVE EVENTS</h3>
+                  {gameEvents
+                    .filter(event => event.location === selectedLocation.id)
+                    .map(event => (
+                      <div 
+                        key={event.id} 
+                        className="city-event-card"
+                        onClick={() => handleEventComplete(event.id)}
+                      >
+                        <div className="city-event-title">{event.title}</div>
+                        <div className="city-event-reward">+{event.reward} XP</div>
+                        <div className="city-event-location">{event.location}</div>
                       </div>
                     ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {currentLocation === 'tower' && (
-              <motion.div 
-                className="space-y-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                <div className="crushed-paper p-6">
-                  <h3 className="vintage-subtitle text-xl mb-4 text-vintage-brown">BRIDGE MASTERY</h3>
-                  <div className="space-y-4">
-                    <div className="vintage-stat p-4">
-                      <div className="flex justify-between items-center">
-                        <span className="vintage-text text-sm">Basic Bridge Tutorial</span>
-                        <Star className="w-4 h-4 text-aged-yellow" />
-                      </div>
-                    </div>
-                    <div className="vintage-stat p-4">
-                      <div className="flex justify-between items-center">
-                        <span className="vintage-text text-sm">Advanced Swaps</span>
-                        <Star className="w-4 h-4 text-aged-yellow" />
-                      </div>
-                    </div>
-                    <div className="vintage-stat p-4">
-                      <div className="flex justify-between items-center">
-                        <span className="vintage-text text-sm">Chain Analytics</span>
-                        <Star className="w-4 h-4 text-aged-yellow" />
-                      </div>
-                    </div>
-                  </div>
-                  <button className="vintage-button px-6 py-3 w-full mt-4">
-                    <Crown className="w-5 h-5 inline mr-2" />
-                    START TUTORIAL
-                  </button>
                 </div>
 
-                <div className="crushed-paper p-6">
-                  <h3 className="vintage-subtitle text-xl mb-4 text-vintage-brown">MASTERY TESTS</h3>
-                  <p className="vintage-text mb-4">Prove your cross-chain expertise</p>
-                  <button className="vintage-button px-6 py-3 w-full">
-                    <Target className="w-5 h-5 inline mr-2" />
-                    TAKE MASTERY TEST
+                <div className="city-action-buttons">
+                  {selectedLocation.id === 'marketplace' && (
+                    <button 
+                      className="city-action-button"
+                      onClick={() => handleNavigateToLocation('marketplace')}
+                    >
+                      <Store className="w-4 h-4" />
+                      ENTER
+                    </button>
+                  )}
+                  {selectedLocation.id === 'arena' && (
+                    <button className="city-action-button">
+                      <Sword className="w-4 h-4" />
+                      BATTLE
+                    </button>
+                  )}
+                  {selectedLocation.id === 'tower' && (
+                    <button className="city-action-button">
+                      <Crown className="w-4 h-4" />
+                      MASTERY
+                    </button>
+                  )}
+                  <button 
+                    className="city-action-button"
+                    onClick={handleExplore}
+                  >
+                    <Target className="w-4 h-4" />
+                    EXPLORE
                   </button>
                 </div>
-              </motion.div>
+              </div>
             )}
-          </div>
+          </motion.div>
         </div>
 
-        {/* Bottom Game Bar */}
         <motion.div 
           className="crushed-paper border-t-4 border-vintage-brown p-4"
           initial={{ y: 100 }}
@@ -424,7 +430,7 @@ export default function CityPage() {
         >
           <div className="flex justify-between items-center">
             <div className="vintage-text text-sm text-vintage-brown">
-              ASGARD CITY | {locations[currentLocation as keyof typeof locations].name}
+              ASGARD CITY | {selectedLocation ? selectedLocation.name : 'CITY MAP'}
             </div>
             <div className="flex items-center gap-4">
               <span className="vintage-text text-sm text-charcoal">
@@ -439,6 +445,26 @@ export default function CityPage() {
             </div>
           </div>
         </motion.div>
+      </div>
+
+      <div className={`city-modal-overlay ${showModal ? 'open' : ''}`} onClick={handleCloseModal}>
+        <div className="city-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="city-modal-header">
+            <h2 className="city-modal-title">{modalContent?.title}</h2>
+            <button className="city-modal-close" onClick={handleCloseModal}>
+              ×
+            </button>
+          </div>
+          <div className="city-location-description">
+            {modalContent?.content}
+          </div>
+          <div className="city-action-buttons">
+            <button className="city-action-button" onClick={handleCloseModal}>
+              <ArrowLeft className="w-4 h-4" />
+              CLOSE
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -21,6 +21,7 @@ import {
   Percent
 } from 'lucide-react';
 import { useGameStore } from '@/stores/gameStore';
+import { tradingService } from '@/services/tradingService';
 
 export default function MarketplacePage() {
   const { 
@@ -40,6 +41,8 @@ export default function MarketplacePage() {
   const [bridgeFromChain, setBridgeFromChain] = useState('ethereum');
   const [bridgeToChain, setBridgeToChain] = useState('stellar');
   const [isBridging, setIsBridging] = useState(false);
+  const [useRealTrading, setUseRealTrading] = useState(false);
+  const [swapQuote, setSwapQuote] = useState<any>(null);
 
   const tokens = [
     { symbol: 'ETH', name: 'Ethereum', price: 2450.32, change: 2.5, icon: '🔵' },
@@ -52,26 +55,142 @@ export default function MarketplacePage() {
     if (!swapAmount || parseFloat(swapAmount) <= 0) return;
     
     setIsSwapping(true);
-    // Simulate swap
-    await new Promise(resolve => setTimeout(resolve, 2000));
     
-    addXP(25);
-    addCredits(50);
-    setIsSwapping(false);
-    setSwapAmount('');
+    try {
+      if (useRealTrading) {
+        // Real trading with actual wallet
+        const fromAddress = player?.walletAddress || '';
+        
+        // Get swap quote first
+        const quote = await tradingService.getSwapQuote(
+          swapFrom,
+          swapTo,
+          swapAmount,
+          fromAddress
+        );
+        
+        setSwapQuote(quote);
+        
+        // Execute the swap
+        const swapTx = await tradingService.executeSwap(
+          swapFrom,
+          swapTo,
+          swapAmount,
+          fromAddress,
+          1 // 1% slippage
+        );
+        
+        // Record transaction in backend
+        const response = await fetch('/api/profile/transactions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            walletAddress: fromAddress,
+            txHash: swapTx.txHash,
+            type: 'swap',
+            fromToken: swapFrom,
+            toToken: swapTo,
+            amount: swapAmount,
+            valueUsd: parseFloat(swapAmount) * 1490.20, // Approximate value
+            chain: 'ethereum',
+            blockNumber: 0, // Will be updated
+            gasUsed: swapTx.gasUsed,
+            gasPrice: swapTx.gasPrice
+          })
+        });
+
+        if (response.ok) {
+          addXP(25);
+          addCredits(50);
+          setSwapAmount('');
+          setSwapQuote(null);
+        }
+      } else {
+        // Mock trading (existing code)
+        const txHash = '0x' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        
+        const estimatedValue = parseFloat(swapAmount) * 1490.20;
+        
+        const response = await fetch('/api/profile/transactions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            walletAddress: player?.walletAddress || '0x6f21...9f8e',
+            txHash: txHash,
+            type: 'swap',
+            fromToken: swapFrom,
+            toToken: swapTo,
+            amount: swapAmount,
+            valueUsd: estimatedValue,
+            chain: 'ethereum',
+            blockNumber: Math.floor(Math.random() * 1000000),
+            gasUsed: Math.floor(Math.random() * 200000),
+            gasPrice: Math.random() * 50
+          })
+        });
+
+        if (response.ok) {
+          addXP(25);
+          addCredits(50);
+          setSwapAmount('');
+        }
+      }
+    } catch (error) {
+      console.error('Error during swap:', error);
+    } finally {
+      setIsSwapping(false);
+    }
   };
 
   const handleBridge = async () => {
     if (!bridgeAmount || parseFloat(bridgeAmount) <= 0) return;
     
     setIsBridging(true);
-    // Simulate bridge
-    await new Promise(resolve => setTimeout(resolve, 3000));
     
-    addXP(50);
-    addCredits(100);
-    setIsBridging(false);
-    setBridgeAmount('');
+    try {
+      // Generate a mock transaction hash
+      const txHash = '0x' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      
+      // Calculate estimated value (mock)
+      const estimatedValue = parseFloat(bridgeAmount) * 1.00; // USDC price
+      
+      // Add transaction to backend
+      const response = await fetch('/api/profile/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          walletAddress: player?.walletAddress || '0x6f21...9f8e',
+          txHash: txHash,
+          type: 'bridge',
+          fromToken: 'USDC',
+          toToken: 'XLM',
+          amount: bridgeAmount,
+          valueUsd: estimatedValue,
+          chain: 'stellar',
+          blockNumber: Math.floor(Math.random() * 1000000),
+          gasUsed: Math.floor(Math.random() * 200000),
+          gasPrice: Math.random() * 50
+        })
+      });
+
+      if (response.ok) {
+        addXP(50);
+        addCredits(100);
+        setBridgeAmount('');
+      } else {
+        console.error('Failed to record transaction');
+      }
+    } catch (error) {
+      console.error('Error during bridge:', error);
+    } finally {
+      setIsBridging(false);
+    }
   };
 
   if (!isConnected) {
@@ -81,7 +200,7 @@ export default function MarketplacePage() {
           <h2 className="vintage-subtitle text-2xl mb-4 text-rust-red">ACCESS DENIED</h2>
           <p className="vintage-text mb-6">You must connect your wallet to access the marketplace.</p>
           <button 
-            onClick={() => setCurrentView('home')}
+            onClick={() => window.location.href = '/'}
             className="vintage-button px-6 py-3"
           >
             <ArrowLeft className="w-5 h-5 inline mr-2" />
@@ -93,9 +212,20 @@ export default function MarketplacePage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="h-screen relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 vintage-grid"></div>
+      
+      {/* Enhanced Coffee Stains */}
+      <div className="absolute top-20 left-10 w-40 h-40 opacity-20">
+        <div className="w-full h-full bg-coffee-stain rounded-full transform rotate-12"></div>
+      </div>
+      <div className="absolute bottom-40 right-20 w-32 h-32 opacity-15">
+        <div className="w-full h-full bg-coffee-stain rounded-full transform -rotate-45"></div>
+      </div>
+      <div className="absolute top-1/2 left-1/4 w-24 h-24 opacity-10">
+        <div className="w-full h-full bg-coffee-stain rounded-full transform rotate-30"></div>
+      </div>
       
       {/* Coffee Stains */}
       <div className="absolute top-20 left-10 w-32 h-32 opacity-20">
@@ -117,7 +247,7 @@ export default function MarketplacePage() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <button 
-                onClick={() => setCurrentView('city')}
+                onClick={() => window.location.href = '/city'}
                 className="vintage-button px-3 py-1 text-xs"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -164,7 +294,7 @@ export default function MarketplacePage() {
         <div className="flex-1 flex">
           
           {/* Left Sidebar - Market Data */}
-          <div className="w-80 bg-old-paper border-r-4 border-vintage-brown p-6">
+          <div className="w-80 bg-old-paper border-r-4 border-vintage-brown p-4 overflow-hidden">
             <h2 className="vintage-subtitle text-lg mb-6 text-vintage-brown">
               MARKET DATA
             </h2>
@@ -228,8 +358,31 @@ export default function MarketplacePage() {
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 p-8 overflow-y-auto">
+          <div className="flex-1 p-6 overflow-hidden">
             
+            {/* Trading Mode Toggle */}
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex gap-2">
+                <button 
+                  className={`vintage-button px-4 py-2 text-sm ${!useRealTrading ? 'bg-vintage-brown text-crushed-paper' : 'bg-crushed-paper text-vintage-brown'}`}
+                  onClick={() => setUseRealTrading(false)}
+                >
+                  MOCK TRADING
+                </button>
+                <button 
+                  className={`vintage-button px-4 py-2 text-sm ${useRealTrading ? 'bg-vintage-brown text-crushed-paper' : 'bg-crushed-paper text-vintage-brown'}`}
+                  onClick={() => setUseRealTrading(true)}
+                >
+                  REAL TRADING
+                </button>
+              </div>
+              {useRealTrading && (
+                <div className="text-xs text-rust-red vintage-text">
+                  ⚠️ REAL FUNDS WILL BE USED
+                </div>
+              )}
+            </div>
+
             {/* Tab Navigation */}
             <div className="flex gap-4 mb-8">
               <button
@@ -471,6 +624,71 @@ export default function MarketplacePage() {
                 </div>
               </motion.div>
             )}
+
+            {/* Market Statistics Section */}
+            <motion.div 
+              className="mt-6 crushed-paper p-4"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.8 }}
+            >
+              <h3 className="vintage-subtitle text-xl mb-6 text-center text-vintage-brown">
+                MARKET OVERVIEW
+              </h3>
+              <div className="grid grid-cols-4 gap-6 text-center">
+                <div>
+                  <div className="text-3xl text-forest-green vintage-text mb-2">$2.4M</div>
+                  <div className="text-sm text-charcoal vintage-text">24H VOLUME</div>
+                </div>
+                <div>
+                  <div className="text-3xl text-rust-red vintage-text mb-2">847</div>
+                  <div className="text-sm text-charcoal vintage-text">ACTIVE TRADES</div>
+                </div>
+                <div>
+                  <div className="text-3xl text-aged-yellow vintage-text mb-2">99.8%</div>
+                  <div className="text-sm text-charcoal vintage-text">SUCCESS RATE</div>
+                </div>
+                <div>
+                  <div className="text-3xl text-vintage-brown vintage-text mb-2">12</div>
+                  <div className="text-sm text-charcoal vintage-text">SUPPORTED PAIRS</div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Recent Activity Section */}
+            <motion.div 
+              className="mt-4 vintage-stat p-4"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.0, duration: 0.8 }}
+            >
+              <h3 className="vintage-subtitle text-lg mb-4 text-vintage-brown">
+                RECENT ACTIVITY
+              </h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center p-2 bg-crushed-paper border border-vintage-brown">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-forest-green rounded-full"></div>
+                    <span className="vintage-text text-sm">ETH → USDC Swap</span>
+                  </div>
+                  <span className="vintage-text text-sm text-forest-green">+25 XP</span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-crushed-paper border border-vintage-brown">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-aged-yellow rounded-full"></div>
+                    <span className="vintage-text text-sm">ETH → Stellar Bridge</span>
+                  </div>
+                  <span className="vintage-text text-sm text-aged-yellow">+50 XP</span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-crushed-paper border border-vintage-brown">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-rust-red rounded-full"></div>
+                    <span className="vintage-text text-sm">XLM → ETH Bridge</span>
+                  </div>
+                  <span className="vintage-text text-sm text-rust-red">+50 XP</span>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
 

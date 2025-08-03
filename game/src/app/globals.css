@@ -26,6 +26,7 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  overflow-y: hidden; /* Prevent vertical scrolling */
   background: 
     radial-gradient(circle at 20% 80%, rgba(244, 209, 63, 0.1) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
@@ -33,6 +34,9 @@ body {
   font-family: 'Special Elite', cursive;
   color: var(--ink-black);
   position: relative;
+  font-size: 14px; /* Reduced base font size */
+  line-height: 1.4; /* Reduced line height */
+  height: 100vh; /* Full viewport height */
 }
 
 /* Crushed Paper Background Effect */
@@ -52,78 +56,90 @@ body::before {
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 12px;
+  width: 16px; /* Increased scrollbar width */
 }
 
 ::-webkit-scrollbar-track {
   background: var(--old-paper);
-  border: 2px solid var(--vintage-brown);
+  border: 3px solid var(--vintage-brown); /* Increased border */
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--vintage-brown);
-  border-radius: 6px;
-  border: 2px solid var(--old-paper);
+  border-radius: 8px; /* Increased border radius */
+  border: 3px solid var(--old-paper);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--coffee-stain);
 }
 
-/* Typography */
+/* Typography - Optimized for viewport fit */
 .vintage-title {
   font-family: 'Creepster', cursive;
   font-weight: 400;
+  font-size: 2.5rem; /* Reduced for better fit */
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.1em; /* Reduced letter spacing */
   text-shadow: 
     2px 2px 0px var(--vintage-brown),
     4px 4px 0px var(--rust-red),
     6px 6px 0px var(--charcoal);
   color: var(--aged-yellow);
+  line-height: 1.1; /* Tighter line height */
+  margin-bottom: 0.5rem; /* Reduced margin */
 }
 
 .vintage-subtitle {
   font-family: 'Press Start 2P', cursive;
   font-weight: 400;
+  font-size: 1rem; /* Reduced for better fit */
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.05em; /* Reduced letter spacing */
   color: var(--rust-red);
+  line-height: 1.3;
+  margin-bottom: 0.5rem; /* Reduced margin */
 }
 
 .vintage-text {
   font-family: 'Special Elite', cursive;
   font-weight: 400;
-  letter-spacing: 0.02em;
+  font-size: 0.95rem; /* Reduced for better fit */
+  letter-spacing: 0.02em; /* Reduced letter spacing */
   color: var(--ink-black);
+  line-height: 1.4; /* Reduced line height */
 }
 
 .terminal-text {
   font-family: 'VT323', monospace;
   font-weight: 400;
+  font-size: 1.2rem; /* Increased size */
   color: var(--forest-green);
+  line-height: 1.5;
 }
 
-/* Crushed Paper Cards */
+/* Crushed Paper Cards - Optimized for viewport fit */
 .crushed-paper {
   background: 
     linear-gradient(45deg, var(--crushed-paper) 0%, var(--old-paper) 100%);
-  border: 3px solid var(--vintage-brown);
+  border: 3px solid var(--vintage-brown); /* Reduced border */
   box-shadow: 
     0 4px 8px rgba(139, 69, 19, 0.3),
     0 8px 16px rgba(139, 69, 19, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
   position: relative;
   transform: rotate(-0.5deg);
+  padding: 1rem; /* Reduced padding */
+  margin: 0.75rem 0; /* Reduced margin */
 }
 
 .crushed-paper::before {
   content: '';
   position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
   background: 
     linear-gradient(45deg, var(--vintage-brown) 0%, var(--coffee-stain) 100%);
   z-index: -1;
@@ -133,25 +149,25 @@ body::before {
 .crushed-paper::after {
   content: '';
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 20px;
-  height: 20px;
+  top: 15px;
+  right: 15px;
+  width: 30px; /* Increased size */
+  height: 30px;
   background: radial-gradient(circle, var(--coffee-stain) 0%, transparent 70%);
   border-radius: 50%;
   opacity: 0.6;
 }
 
-/* Vintage Buttons */
+/* Vintage Buttons - Optimized for viewport fit */
 .vintage-button {
   font-family: 'Press Start 2P', cursive;
-  font-size: 0.8rem;
+  font-size: 0.8rem; /* Reduced for better fit */
   background: 
     linear-gradient(45deg, var(--vintage-brown) 0%, var(--coffee-stain) 100%);
-  border: 3px solid var(--ink-black);
+  border: 3px solid var(--ink-black); /* Reduced border */
   color: var(--crushed-paper);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em; /* Reduced letter spacing */
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -159,6 +175,13 @@ body::before {
   box-shadow: 
     0 4px 0 var(--ink-black),
     0 8px 8px rgba(0, 0, 0, 0.3);
+  padding: 0.75rem 1.5rem; /* Reduced padding */
+  margin: 0.25rem; /* Reduced margin */
+  min-height: 2.5rem; /* Reduced minimum height */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* Reduced space between icon and text */
 }
 
 .vintage-button::before {
@@ -177,20 +200,20 @@ body::before {
 }
 
 .vintage-button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px); /* Increased hover effect */
   box-shadow: 
-    0 6px 0 var(--ink-black),
-    0 12px 12px rgba(0, 0, 0, 0.4);
+    0 9px 0 var(--ink-black),
+    0 18px 18px rgba(0, 0, 0, 0.4);
 }
 
 .vintage-button:active {
-  transform: translateY(2px);
+  transform: translateY(3px);
   box-shadow: 
-    0 2px 0 var(--ink-black),
-    0 4px 4px rgba(0, 0, 0, 0.3);
+    0 3px 0 var(--ink-black),
+    0 6px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* Coffee Stain Effects */
+/* Coffee Stain Effects - Enhanced */
 .coffee-stain {
   position: relative;
 }
@@ -198,10 +221,10 @@ body::before {
 .coffee-stain::before {
   content: '';
   position: absolute;
-  top: -10px;
-  left: -10px;
-  width: 40px;
-  height: 40px;
+  top: -15px;
+  left: -15px;
+  width: 60px; /* Increased size */
+  height: 60px;
   background: radial-gradient(ellipse, var(--coffee-stain) 0%, transparent 70%);
   border-radius: 50%;
   opacity: 0.3;
@@ -211,21 +234,23 @@ body::before {
 .coffee-stain::after {
   content: '';
   position: absolute;
-  bottom: -5px;
-  right: -5px;
-  width: 25px;
-  height: 25px;
+  bottom: -10px;
+  right: -10px;
+  width: 40px; /* Increased size */
+  height: 40px;
   background: radial-gradient(ellipse, var(--coffee-stain) 0%, transparent 70%);
   border-radius: 50%;
   opacity: 0.2;
   transform: rotate(45deg);
 }
 
-/* Torn Paper Effect */
+/* Torn Paper Effect - Enhanced */
 .torn-paper {
   position: relative;
   background: var(--crushed-paper);
-  border: 2px solid var(--vintage-brown);
+  border: 3px solid var(--vintage-brown); /* Increased border */
+  padding: 2rem; /* Added padding */
+  margin: 1rem 0; /* Added margin */
 }
 
 .torn-paper::before {
@@ -234,28 +259,31 @@ body::before {
   top: 0;
   left: 0;
   right: 0;
-  height: 20px;
+  height: 30px; /* Increased height */
   background: 
     repeating-linear-gradient(
       45deg,
       transparent,
-      transparent 2px,
-      var(--vintage-brown) 2px,
-      var(--vintage-brown) 4px
+      transparent 3px,
+      var(--vintage-brown) 3px,
+      var(--vintage-brown) 6px
     );
   clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
 }
 
-/* Vintage Stats Cards */
+/* Vintage Stats Cards - Enhanced */
 .vintage-stat {
   background: 
     linear-gradient(135deg, var(--old-paper) 0%, var(--crushed-paper) 100%);
-  border: 2px solid var(--vintage-brown);
+  border: 3px solid var(--vintage-brown); /* Increased border */
   box-shadow: 
-    0 4px 8px rgba(139, 69, 19, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 6px 12px rgba(139, 69, 19, 0.2),
+    inset 0 2px 0 rgba(255, 255, 255, 0.3);
   position: relative;
   transform: rotate(0.5deg);
+  padding: 1.5rem; /* Increased padding */
+  margin: 1rem 0; /* Added margin */
+  min-height: 4rem; /* Minimum height */
 }
 
 .vintage-stat:nth-child(even) {
@@ -265,16 +293,16 @@ body::before {
 .vintage-stat::after {
   content: '';
   position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 15px;
-  height: 15px;
+  top: 10px;
+  right: 10px;
+  width: 25px; /* Increased size */
+  height: 25px;
   background: radial-gradient(circle, var(--coffee-stain) 0%, transparent 70%);
   border-radius: 50%;
   opacity: 0.4;
 }
 
-/* Animated Elements */
+/* Animated Elements - Enhanced */
 .flicker {
   animation: flicker 3s infinite alternate;
 }
@@ -287,7 +315,7 @@ body::before {
 
 .typewriter {
   overflow: hidden;
-  border-right: 3px solid var(--forest-green);
+  border-right: 4px solid var(--forest-green); /* Increased border */
   white-space: nowrap;
   animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
 }
@@ -317,31 +345,32 @@ body::before {
 .bg-rust-red { background-color: var(--rust-red); }
 .bg-forest-green { background-color: var(--forest-green); }
 
-/* Vintage Borders */
+/* Vintage Borders - Enhanced */
 .border-vintage {
-  border: 3px solid var(--vintage-brown);
+  border: 4px solid var(--vintage-brown); /* Increased border */
   box-shadow: 
-    0 4px 8px rgba(139, 69, 19, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    0 6px 12px rgba(139, 69, 19, 0.3),
+    inset 0 2px 0 rgba(255, 255, 255, 0.4);
 }
 
 .border-torn {
-  border: 2px solid var(--vintage-brown);
+  border: 3px solid var(--vintage-brown); /* Increased border */
   border-style: solid;
   border-image: 
     repeating-linear-gradient(
       45deg,
       var(--vintage-brown),
-      var(--vintage-brown) 2px,
-      transparent 2px,
-      transparent 4px
+      var(--vintage-brown) 3px,
+      transparent 3px,
+      transparent 6px
     ) 1;
 }
 
-/* Loading Animation */
+/* Loading Animation - Enhanced */
 .vintage-loading {
   display: inline-block;
   font-family: 'VT323', monospace;
+  font-size: 1.3rem; /* Increased size */
 }
 
 .vintage-loading::after {
@@ -356,11 +385,13 @@ body::before {
   80%, 100% { content: '...'; }
 }
 
-/* Paper Fold Effect */
+/* Paper Fold Effect - Enhanced */
 .paper-fold {
   position: relative;
   background: var(--crushed-paper);
-  border: 2px solid var(--vintage-brown);
+  border: 3px solid var(--vintage-brown); /* Increased border */
+  padding: 2rem; /* Added padding */
+  margin: 1rem 0; /* Added margin */
 }
 
 .paper-fold::before {
@@ -371,20 +402,20 @@ body::before {
   width: 0;
   height: 0;
   border-style: solid;
-  border-width: 0 20px 20px 0;
+  border-width: 0 30px 30px 0; /* Increased size */
   border-color: transparent var(--coffee-stain) transparent transparent;
 }
 
-/* Vintage Grid */
+/* Vintage Grid - Enhanced */
 .vintage-grid {
   background-image: 
-    linear-gradient(var(--vintage-brown) 1px, transparent 1px),
-    linear-gradient(90deg, var(--vintage-brown) 1px, transparent 1px);
-  background-size: 20px 20px;
-  opacity: 0.1;
+    linear-gradient(var(--vintage-brown) 2px, transparent 2px), /* Increased line thickness */
+    linear-gradient(90deg, var(--vintage-brown) 2px, transparent 2px);
+  background-size: 30px 30px; /* Increased grid size */
+  opacity: 0.12; /* Slightly increased opacity */
 }
 
-/* Ink Blot Effect */
+/* Ink Blot Effect - Enhanced */
 .ink-blot {
   position: relative;
 }
@@ -392,12 +423,151 @@ body::before {
 .ink-blot::before {
   content: '';
   position: absolute;
-  top: -5px;
-  left: -5px;
-  width: 30px;
-  height: 30px;
+  top: -8px;
+  left: -8px;
+  width: 45px; /* Increased size */
+  height: 45px;
   background: radial-gradient(ellipse, var(--ink-black) 0%, transparent 70%);
   border-radius: 50%;
   opacity: 0.2;
   transform: rotate(30deg);
+}
+
+/* Optimized spacing utilities for viewport fit */
+.space-y-6 > * + * {
+  margin-top: 1rem; /* Reduced for better fit */
+}
+
+.space-y-8 > * + * {
+  margin-top: 1.5rem; /* Reduced for better fit */
+}
+
+.gap-6 {
+  gap: 1rem; /* Reduced for better fit */
+}
+
+.gap-8 {
+  gap: 1.5rem; /* Reduced for better fit */
+}
+
+/* Optimized padding utilities for viewport fit */
+.p-6 {
+  padding: 1rem; /* Reduced for better fit */
+}
+
+.p-8 {
+  padding: 1.5rem; /* Reduced for better fit */
+}
+
+.px-6 {
+  padding-left: 1rem; /* Reduced for better fit */
+  padding-right: 1rem;
+}
+
+.py-6 {
+  padding-top: 1rem; /* Reduced for better fit */
+  padding-bottom: 1rem;
+}
+
+/* Enhanced margin utilities */
+.m-6 {
+  margin: 2rem; /* Increased from 1.5rem */
+}
+
+.mb-6 {
+  margin-bottom: 2rem; /* Increased from 1.5rem */
+}
+
+.mt-6 {
+  margin-top: 2rem; /* Increased from 1.5rem */
+}
+
+/* Optimized text sizes for viewport fit */
+.text-lg {
+  font-size: 1.1rem; /* Reduced for better fit */
+}
+
+.text-xl {
+  font-size: 1.25rem; /* Reduced for better fit */
+}
+
+.text-2xl {
+  font-size: 1.5rem; /* Reduced for better fit */
+}
+
+.text-3xl {
+  font-size: 1.875rem; /* Reduced for better fit */
+}
+
+/* Enhanced container spacing */
+.container {
+  padding-left: 2rem; /* Increased from 1rem */
+  padding-right: 2rem;
+}
+
+/* Enhanced sidebar styling */
+.sidebar {
+  width: 400px; /* Increased from 320px */
+  padding: 2rem; /* Increased padding */
+}
+
+/* Enhanced card spacing */
+.card {
+  padding: 2rem; /* Increased padding */
+  margin: 1.5rem 0; /* Increased margin */
+  min-height: 6rem; /* Minimum height */
+}
+
+/* Enhanced form elements */
+input, select, textarea {
+  font-size: 1.1rem; /* Increased font size */
+  padding: 1rem; /* Increased padding */
+  margin: 0.75rem 0; /* Added margin */
+  border: 3px solid var(--vintage-brown); /* Increased border */
+}
+
+/* Enhanced icon sizes */
+.icon-sm {
+  width: 1.5rem; /* Increased from 1.25rem */
+  height: 1.5rem;
+}
+
+.icon-md {
+  width: 2rem; /* Increased from 1.5rem */
+  height: 2rem;
+}
+
+.icon-lg {
+  width: 3rem; /* Increased from 2rem */
+  height: 3rem;
+}
+
+.icon-xl {
+  width: 4rem; /* Increased from 3rem */
+  height: 4rem;
+}
+
+/* Viewport optimization */
+.min-h-screen {
+  min-height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+.h-screen {
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+/* Ensure content fits in viewport */
+.flex-1 {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Optimize sidebar height */
+.overflow-y-auto {
+  max-height: calc(100vh - 200px); /* Account for top and bottom bars */
 } 

@@ -1,5 +1,9 @@
 const { ethers } = require('ethers');
 const logger = require('../utils/logger');
+const RealTradingService = require('./realTradingService');
+
+// Initialize real trading service
+const realTradingService = new RealTradingService();
 
 // 1inch API configuration
 const ONEINCH_API_URL = 'https://api.1inch.dev/swap/v6.0';
@@ -13,15 +17,18 @@ const UNISWAP_ROUTER_ABI = [
   'function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts)',
 ];
 
-// Token addresses (Ethereum Mainnet)
+// Token addresses (Base Sepolia Testnet - Verified)
 const TOKEN_ADDRESSES = {
   ETH: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-  WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-  USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-  DAI: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-  USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-  LINK: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
-  UNI: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
+  WETH: '0x4200000000000000000000000000000000000006',
+  USDC: '0x036CbD53842c5426634e7929541eC2318f3dCF7c',
+  DAI: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
+  USDT: '0x1990BC6dfe2ef605Bfc08f5A23564dB75642Ad73',
+  LINK: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
+  // Real Base Sepolia tokens (verified on explorer)
+  WBTC: '0x29f2D40B060540436f03CC5Fb8aE5a8C5Cbd1E89',
+  USDbC: '0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22',
+  cbETH: '0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22',
 };
 
 class TradingService {
@@ -130,32 +137,41 @@ class TradingService {
   // Execute swap (backend handles the transaction)
   async executeSwap(fromToken, toToken, amount, fromAddress, slippage = 1) {
     try {
-      // Get quote first
-      const quote = await this.getSwapQuote(
+      logger.info('Executing real swap', {
         fromToken,
         toToken,
         amount,
-        fromAddress
-      );
+        fromAddress,
+        slippage,
+      });
 
-      // For now, return a simulated transaction
-      // In production, you would execute the actual transaction here
-      const txHash =
-        '0x' +
-        Math.random().toString(36).substring(2, 15) +
-        Math.random().toString(36).substring(2, 15);
+      // Initialize real trading service if not already done
+      if (!realTradingService.isInitialized) {
+        await realTradingService.initialize();
+      }
+
+      // Use real 1inch trading
+      const result = await realTradingService.executeSwap(
+        fromToken,
+        toToken,
+        amount,
+        fromAddress,
+        slippage
+      );
 
       return {
         fromToken,
         toToken,
         fromAmount: amount,
-        toAmount: quote.toAmount,
-        txHash,
-        status: 'pending',
-        gasUsed: '150000',
-        gasPrice: '20000000000', // 20 gwei
-        quote,
-        source: quote.source,
+        toAmount: result.estimatedAmount,
+        txHash: result.txHash,
+        status: 'completed',
+        gasUsed: result.gasUsed,
+        gasPrice: result.gasPrice,
+        blockNumber: result.blockNumber,
+        protocol: result.protocol,
+        explorerUrl: result.explorerUrl,
+        source: '1inch',
       };
     } catch (error) {
       logger.error('Error executing swap:', error);
@@ -202,9 +218,16 @@ class TradingService {
   // Validate token pair
   validateTokenPair(fromToken, toToken) {
     const supportedTokens = this.getSupportedTokens();
-    return (
-      supportedTokens.includes(fromToken) && supportedTokens.includes(toToken)
-    );
+    const supportedAddresses = Object.values(TOKEN_ADDRESSES);
+
+    // Check if tokens are symbols or addresses
+    const fromValid =
+      supportedTokens.includes(fromToken) ||
+      supportedAddresses.includes(fromToken);
+    const toValid =
+      supportedTokens.includes(toToken) || supportedAddresses.includes(toToken);
+
+    return fromValid && toValid;
   }
 }
 

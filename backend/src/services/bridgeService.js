@@ -1,4 +1,8 @@
 const logger = require('../utils/logger');
+const RealHtlcService = require('./realHtlcService');
+
+// Initialize real HTLC service
+const realHtlcService = new RealHtlcService();
 
 // Bridge protocol configurations
 const BRIDGE_PROTOCOLS = {
@@ -123,22 +127,35 @@ class BridgeService {
         amount
       );
 
-      // For real testnet integration, we would create actual HTLC transactions
-      // For now, generate a realistic transaction hash that can be tracked
-      const timestamp = Date.now().toString(16);
-      const randomPart = Math.random().toString(36).substring(2, 15);
-      const txHash =
-        `0x${timestamp}${randomPart}${fromChain}${toChain}`.substring(0, 66);
+      // Initialize real HTLC service if not already done
+      if (!realHtlcService.isInitialized) {
+        await realHtlcService.initialize();
+      }
 
-      // In production, this would be:
-      // 1. Create HTLC on source chain (Stellar)
-      // 2. Wait for confirmation
-      // 3. Create HTLC on destination chain (Ethereum)
-      // 4. Return real transaction hashes
+      // Create real HTLC on destination chain (Base Sepolia)
+      const contractId = `bridge-${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2, 15)}`;
+      const hashlock = this.generateHashlock();
+      const timelock = 30; // 30 minutes
+
+      const htlcParams = {
+        contractId,
+        participant: toAddress,
+        amount: quote.estimatedAmount,
+        hashlock,
+        timelock,
+        asset: fromToken === 'XLM' ? 'ETH' : fromToken,
+        stellarAddress:
+          'GAQL5CSBEPS2JLWPMNYCYXADUBRU3FUHOXL5IAM33EPHL4RHGMCEN6KB',
+      };
+
+      // Create real HTLC transaction
+      const htlcResult = await realHtlcService.createHTLC(htlcParams);
 
       // Generate explorer links
-      const stellarExplorer = `https://testnet.stellarchain.io/transactions/${txHash}`;
-      const ethereumExplorer = `https://sepolia.basescan.org/tx/${txHash}`; // Base Sepolia explorer
+      const stellarExplorer = `https://testnet.stellarchain.io/transactions/${htlcResult.txHash}`;
+      const ethereumExplorer = `https://sepolia.basescan.org/tx/${htlcResult.txHash}`; // Base Sepolia explorer
 
       return {
         fromChain,
@@ -147,17 +164,20 @@ class BridgeService {
         toToken: quote.toToken,
         amount,
         estimatedAmount: quote.estimatedAmount,
-        txHash,
+        txHash: htlcResult.txHash,
         status: 'pending',
         protocol: quote.protocol,
         estimatedTime: quote.estimatedTime,
         fee: quote.fee,
+        contractId: htlcResult.contractId,
+        blockNumber: htlcResult.blockNumber,
+        gasUsed: htlcResult.gasUsed,
         explorers: {
           stellar: stellarExplorer,
           ethereum: ethereumExplorer,
-          baseSepolia: `https://sepolia.basescan.org/tx/${txHash}`,
-          polygon: `https://mumbai.polygonscan.com/tx/${txHash}`,
-          bsc: `https://testnet.bscscan.com/tx/${txHash}`,
+          baseSepolia: `https://sepolia.basescan.org/tx/${htlcResult.txHash}`,
+          polygon: `https://mumbai.polygonscan.com/tx/${htlcResult.txHash}`,
+          bsc: `https://testnet.bscscan.com/tx/${htlcResult.txHash}`,
         },
       };
     } catch (error) {
@@ -280,6 +300,14 @@ class BridgeService {
     }
 
     return errors;
+  }
+
+  // Generate hashlock for HTLC
+  generateHashlock() {
+    const crypto = require('crypto');
+    const preimage = crypto.randomBytes(32);
+    const hashlock = crypto.createHash('sha256').update(preimage).digest('hex');
+    return hashlock;
   }
 }
 

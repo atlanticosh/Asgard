@@ -514,15 +514,47 @@
   box-shadow: 0 2px 0 var(--ink-black);
 }
 
+.stellar-status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.stellar-clear-button {
+  background: var(--crushed-paper);
+  border: 2px solid var(--vintage-brown);
+  color: var(--vintage-brown);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+.stellar-clear-button:hover {
+  background: var(--vintage-brown);
+  color: var(--crushed-paper);
+  transform: scale(1.1);
+  box-shadow: 0 2px 0 var(--ink-black);
+}
+
 .stellar-status-message {
   font-family: 'Press Start 2P', cursive;
   font-size: 0.8rem;
   color: var(--vintage-brown);
   text-align: center;
-  margin-bottom: 1rem;
   padding: 0.5rem;
   background: var(--aged-yellow);
   border-radius: 4px;
+  flex: 1;
 }
 
 .stellar-progress-bar {

@@ -1,7 +1,6 @@
 # Project specific
 /tests/
 /docs/
-*.md
 
 # Dependencies
 node_modules/

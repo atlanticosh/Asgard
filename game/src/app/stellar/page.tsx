@@ -299,12 +299,9 @@ export default function StellarPage() {
       addXP(100);
       addCredits(200);
       
-      // Step 5: Clear form after success
-      setTimeout(() => {
-        setBridgeAmount('');
-        setBridgeStatus('');
-        setBridgeResult(null);
-      }, 3000);
+      // Step 5: Clear form but keep results visible
+      setBridgeAmount('');
+      // Don't auto-clear status and results - let user see them
       
     } catch (error) {
       console.error('Bridge error:', error);
@@ -479,16 +476,29 @@ export default function StellarPage() {
                   {/* Bridge Status Display */}
                   {bridgeStatus && (
                     <div className="stellar-bridge-status">
-                      <div className="stellar-status-message">
-                        {bridgeStatus}
-                        {bridgeProgress && (
-                          <div className="stellar-progress-bar">
-                            <div 
-                              className="stellar-progress-fill" 
-                              style={{ width: bridgeProgress }}
-                            ></div>
-                          </div>
-                        )}
+                      <div className="stellar-status-header">
+                        <div className="stellar-status-message">
+                          {bridgeStatus}
+                          {bridgeProgress && (
+                            <div className="stellar-progress-bar">
+                              <div 
+                                className="stellar-progress-fill" 
+                                style={{ width: bridgeProgress }}
+                              ></div>
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => {
+                            setBridgeStatus('');
+                            setBridgeResult(null);
+                            setBridgeProgress('');
+                          }}
+                          className="stellar-clear-button"
+                          title="Clear bridge results"
+                        >
+                          ×
+                        </button>
                       </div>
                       {bridgeResult && (
                         <div className="stellar-bridge-result">
@@ -508,6 +518,24 @@ export default function StellarPage() {
                             <span className="stellar-result-label">Protocol:</span>
                             <span className="stellar-result-value">{bridgeResult.transaction?.protocol || bridgeResult.protocol}</span>
                           </div>
+                          {bridgeResult.transaction?.contractId && (
+                            <div className="stellar-result-item">
+                              <span className="stellar-result-label">Contract ID:</span>
+                              <span className="stellar-result-value">{bridgeResult.transaction.contractId}</span>
+                            </div>
+                          )}
+                          {bridgeResult.transaction?.blockNumber && (
+                            <div className="stellar-result-item">
+                              <span className="stellar-result-label">Block Number:</span>
+                              <span className="stellar-result-value">{bridgeResult.transaction.blockNumber}</span>
+                            </div>
+                          )}
+                          {bridgeResult.transaction?.gasUsed && (
+                            <div className="stellar-result-item">
+                              <span className="stellar-result-label">Gas Used:</span>
+                              <span className="stellar-result-value">{bridgeResult.transaction.gasUsed}</span>
+                            </div>
+                          )}
                           {bridgeResult.transaction?.explorers && (
                             <div className="stellar-result-item">
                               <span className="stellar-result-label">Explorer Links:</span>

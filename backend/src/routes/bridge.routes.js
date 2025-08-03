@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const BridgeService = require('../services/bridgeService');
 const logger = require('../utils/logger');
 
-// Service registry - will be injected
-let ethereumService = null;
-let coordinatorService = null;
+// Initialize bridge service
+const bridgeService = new BridgeService();
 
 // Function to inject ethereum service
 function setEthereumService(service) {
@@ -39,23 +39,33 @@ const getCoordinatorService = (req, res, next) => {
 };
 
 /**
- * GET /api/bridge/quote - Get quote for bridge swap
+ * POST /api/bridge/quote - Get quote for bridge swap
  */
 router.post('/quote', async (req, res) => {
   try {
+    const { fromChain, toChain, fromToken, amount } = req.body;
     logger.info('Bridge quote request received', { body: req.body });
 
-    // For now, return a stub response
+    // Validate required parameters
+    if (!fromChain || !toChain || !fromToken || !amount) {
+      return res.status(400).json({
+        success: false,
+        error:
+          'Missing required parameters: fromChain, toChain, fromToken, amount',
+      });
+    }
+
+    // Get bridge quote
+    const quote = await bridgeService.getBridgeQuote(
+      fromChain,
+      toChain,
+      fromToken,
+      amount
+    );
+
     res.json({
       success: true,
-      message: 'Bridge quote endpoint - NOT YET IMPLEMENTED',
-      quote: {
-        fromChain: req.body.fromChain || 'ethereum',
-        toChain: req.body.toChain || 'stellar',
-        estimatedAmountOut: '0',
-        estimatedTime: '5 seconds',
-        status: 'stub',
-      },
+      quote,
     });
   } catch (error) {
     logger.error('Bridge quote error:', error);
@@ -71,16 +81,45 @@ router.post('/quote', async (req, res) => {
  */
 router.post('/initiate', async (req, res) => {
   try {
+    const { fromChain, toChain, fromToken, amount, toAddress } = req.body;
     logger.info('Bridge initiate request received', { body: req.body });
 
-    // Generate stub swap ID
-    const swapId = `stub-swap-id-${Date.now()}`;
+    // Validate required parameters
+    if (!fromChain || !toChain || !fromToken || !amount || !toAddress) {
+      return res.status(400).json({
+        success: false,
+        error:
+          'Missing required parameters: fromChain, toChain, fromToken, amount, toAddress',
+      });
+    }
+
+    // Validate bridge parameters
+    const errors = bridgeService.validateBridgeParams(
+      fromChain,
+      toChain,
+      fromToken,
+      amount,
+      toAddress
+    );
+    if (errors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: errors.join(', '),
+      });
+    }
+
+    // Execute bridge
+    const result = await bridgeService.executeBridge(
+      fromChain,
+      toChain,
+      fromToken,
+      amount,
+      toAddress
+    );
 
     res.json({
       success: true,
-      message: 'Bridge initiate endpoint - NOT YET IMPLEMENTED',
-      swapId,
-      status: 'stub',
+      transaction: result,
     });
   } catch (error) {
     logger.error('Bridge initiate error:', error);
@@ -92,22 +131,26 @@ router.post('/initiate', async (req, res) => {
 });
 
 /**
- * GET /api/bridge/status/:id - Get swap status
+ * GET /api/bridge/status/:txHash - Get bridge transaction status
  */
-router.get('/status/:id', async (req, res) => {
+router.get('/status/:txHash', async (req, res) => {
   try {
-    const { id } = req.params;
-    logger.info('Bridge status request received', { swapId: id });
+    const { txHash } = req.params;
+    logger.info('Bridge status request received', { txHash });
+
+    const status = await bridgeService.getBridgeStatus(txHash);
+    const timestamp = parseInt(txHash.substring(2, 18), 16);
+    const elapsed = Date.now() - timestamp;
 
     res.json({
       success: true,
-      message: 'Bridge status endpoint - NOT YET IMPLEMENTED',
-      swapId: id,
-      status: 'stub',
-      data: {
-        status: 'pending',
-        progress: '0%',
-      },
+      txHash,
+      status,
+      timestamp,
+      elapsed,
+      estimatedTime: '10-20 minutes',
+      progress:
+        status === 'pending' ? '25%' : status === 'processing' ? '75%' : '100%',
     });
   } catch (error) {
     logger.error('Bridge status error:', error);

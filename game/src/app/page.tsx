@@ -23,7 +23,8 @@ import {
   BarChart3,
   User,
   LogOut,
-  Menu
+  Menu,
+  Star
 } from 'lucide-react';
 import { useGameStore } from '@/stores/gameStore';
 import { walletService } from '@/services/walletService';
@@ -219,6 +220,20 @@ export default function HomePage() {
                   <div>
                     <div className="home-nav-title">MARKETPLACE</div>
                     <div className="home-nav-description">Trade and bridge assets</div>
+                  </div>
+                </div>
+              </motion.button>
+
+              <motion.button
+                className="home-nav-item"
+                whileHover={{ x: 10 }}
+                onClick={() => window.location.href = '/stellar'}
+              >
+                <div className="flex items-center gap-3">
+                  <Star className="home-nav-icon text-blue-400" />
+                  <div>
+                    <div className="home-nav-title">STELLAR BRIDGE</div>
+                    <div className="home-nav-description">HTLC Cross-Chain Transfers</div>
                   </div>
                 </div>
               </motion.button>

@@ -1,0 +1,665 @@
+/* Stellar Page Styles - Vintage Theme (Matching Other Pages) */
+
+.stellar-layout {
+  min-height: 100vh;
+  background: var(--old-paper);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.stellar-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+    radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(2px 2px at 160px 30px, #ddd, transparent);
+  background-repeat: repeat;
+  background-size: 200px 100px;
+  animation: twinkle 20s linear infinite;
+  opacity: 0.3;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.stellar-container {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.stellar-header {
+  background: var(--crushed-paper);
+  border-bottom: 4px solid var(--vintage-brown);
+  padding: 1rem;
+  box-shadow: 0 4px 20px rgba(139, 69, 19, 0.3);
+}
+
+.stellar-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.stellar-back-button {
+  background: var(--crushed-paper);
+  border: 2px solid var(--vintage-brown);
+  color: var(--vintage-brown);
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.stellar-back-button:hover {
+  background: var(--vintage-brown);
+  color: var(--crushed-paper);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 var(--ink-black);
+}
+
+.stellar-title-section {
+  text-align: center;
+}
+
+.stellar-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.2rem;
+  color: var(--vintage-brown);
+  margin: 0;
+  text-shadow: 2px 2px 0 var(--ink-black);
+}
+
+.stellar-subtitle {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.8rem;
+  color: var(--charcoal);
+  margin: 0.25rem 0 0 0;
+}
+
+.stellar-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.stellar-stat {
+  text-align: center;
+  background: var(--crushed-paper);
+  border: 2px solid var(--vintage-brown);
+  border-radius: 6px;
+  padding: 0.5rem;
+  min-width: 80px;
+  box-shadow: 0 2px 0 var(--ink-black);
+}
+
+.stellar-stat-label {
+  display: block;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  color: var(--charcoal);
+  margin-bottom: 0.25rem;
+}
+
+.stellar-stat-value {
+  display: block;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  color: var(--vintage-brown);
+}
+
+/* Main Content */
+.stellar-main-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Tabs */
+.stellar-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--vintage-brown);
+  padding-bottom: 1rem;
+}
+
+.stellar-tab {
+  background: var(--crushed-paper);
+  border: 2px solid var(--vintage-brown);
+  color: var(--charcoal);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+}
+
+.stellar-tab:hover {
+  background: var(--vintage-brown);
+  color: var(--crushed-paper);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 var(--ink-black);
+}
+
+.stellar-tab.active {
+  background: var(--vintage-brown);
+  border-color: var(--ink-black);
+  color: var(--crushed-paper);
+  box-shadow: 0 4px 0 var(--ink-black);
+}
+
+/* Content */
+.stellar-content {
+  background: var(--crushed-paper);
+  border: 4px solid var(--vintage-brown);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 0 var(--ink-black);
+}
+
+.stellar-section-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.1rem;
+  color: var(--vintage-brown);
+  margin-bottom: 1.5rem;
+  text-shadow: 2px 2px 0 var(--ink-black);
+}
+
+.stellar-subsection-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.9rem;
+  color: var(--vintage-brown);
+  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--vintage-brown);
+  padding-bottom: 0.5rem;
+}
+
+/* Forms */
+.stellar-form-group {
+  margin-bottom: 1rem;
+}
+
+.stellar-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .stellar-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stellar-label {
+  display: block;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.7rem;
+  color: var(--charcoal);
+  margin-bottom: 0.5rem;
+}
+
+.stellar-input,
+.stellar-select {
+  width: 100%;
+  background: var(--crushed-paper);
+  border: 2px solid var(--vintage-brown);
+  border-radius: 6px;
+  padding: 0.75rem;
+  color: var(--charcoal);
+  font-family: 'Special Elite', cursive;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.stellar-input:focus,
+.stellar-select:focus {
+  outline: none;
+  border-color: var(--ink-black);
+  box-shadow: 0 0 10px rgba(139, 69, 19, 0.3);
+}
+
+.stellar-chain-selector {
+  background: var(--crushed-paper);
+  border: 2px solid var(--vintage-brown);
+  border-radius: 6px;
+  padding: 0.75rem;
+  color: var(--vintage-brown);
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+}
+
+.stellar-preimage-input {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.stellar-preimage-input .stellar-input {
+  flex: 1;
+}
+
+/* Buttons */
+.stellar-button {
+  background: var(--crushed-paper);
+  border: 2px solid var(--vintage-brown);
+  color: var(--vintage-brown);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+}
+
+.stellar-button:hover:not(:disabled) {
+  background: var(--vintage-brown);
+  color: var(--crushed-paper);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 var(--ink-black);
+}
+
+.stellar-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stellar-button.primary {
+  background: var(--vintage-brown);
+  border-color: var(--ink-black);
+  color: var(--crushed-paper);
+  box-shadow: 0 4px 0 var(--ink-black);
+}
+
+.stellar-button.primary:hover:not(:disabled) {
+  background: var(--ink-black);
+  border-color: var(--vintage-brown);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--vintage-brown);
+}
+
+.stellar-button.secondary {
+  background: var(--crushed-paper);
+  border-color: var(--charcoal);
+  color: var(--charcoal);
+}
+
+.stellar-button.secondary:hover:not(:disabled) {
+  background: var(--charcoal);
+  color: var(--crushed-paper);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 var(--ink-black);
+}
+
+/* HTLC Forms */
+.stellar-htlc-form,
+.stellar-htlc-management {
+  background: var(--crushed-paper);
+  border: 2px solid var(--vintage-brown);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 0 var(--ink-black);
+}
+
+.stellar-htlc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stellar-htlc-item {
+  background: var(--crushed-paper);
+  border: 2px solid var(--vintage-brown);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 0 var(--ink-black);
+}
+
+.stellar-htlc-info {
+  flex: 1;
+}
+
+.stellar-htlc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.stellar-htlc-id {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.8rem;
+  color: var(--vintage-brown);
+}
+
+.stellar-htlc-status {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.stellar-htlc-status.pending {
+  background: var(--crushed-paper);
+  color: var(--aged-yellow);
+  border: 1px solid var(--aged-yellow);
+}
+
+.stellar-htlc-status.completed {
+  background: var(--crushed-paper);
+  color: var(--forest-green);
+  border: 1px solid var(--forest-green);
+}
+
+.stellar-htlc-status.failed {
+  background: var(--crushed-paper);
+  color: var(--rust-red);
+  border: 1px solid var(--rust-red);
+}
+
+.stellar-htlc-details {
+  display: flex;
+  gap: 1rem;
+  font-family: 'Special Elite', cursive;
+  font-size: 0.7rem;
+  color: var(--charcoal);
+}
+
+.stellar-htlc-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Modal */
+.stellar-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.stellar-modal {
+  background: var(--crushed-paper);
+  border: 4px solid var(--vintage-brown);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 4px 0 var(--ink-black);
+}
+
+.stellar-modal-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1rem;
+  color: var(--vintage-brown);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  text-shadow: 2px 2px 0 var(--ink-black);
+}
+
+.stellar-modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+/* Balance */
+.stellar-balance-section {
+  text-align: center;
+}
+
+.stellar-balance-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.stellar-balance-item {
+  background: var(--crushed-paper);
+  border: 2px solid var(--vintage-brown);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 0 var(--ink-black);
+}
+
+.stellar-balance-asset {
+  display: flex;
+  align-items: center;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  color: var(--vintage-brown);
+}
+
+.stellar-balance-amount {
+  font-family: 'Special Elite', cursive;
+  font-size: 1rem;
+  color: var(--charcoal);
+  font-weight: bold;
+}
+
+/* Test Section */
+.stellar-test-section {
+  text-align: center;
+}
+
+.stellar-test-description {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.9rem;
+  color: var(--charcoal);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+/* Empty States */
+.stellar-empty-state {
+  text-align: center;
+  font-family: 'Special Elite', cursive;
+  font-size: 0.9rem;
+  color: var(--charcoal);
+  padding: 2rem;
+  background: var(--crushed-paper);
+  border: 2px dashed var(--vintage-brown);
+  border-radius: 8px;
+}
+
+/* Bridge Status */
+.stellar-bridge-status {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--crushed-paper);
+  border: 2px solid var(--vintage-brown);
+  border-radius: 8px;
+  box-shadow: 0 2px 0 var(--ink-black);
+}
+
+.stellar-status-message {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  color: var(--vintage-brown);
+  text-align: center;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: var(--aged-yellow);
+  border-radius: 4px;
+}
+
+.stellar-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--crushed-paper);
+  border: 1px solid var(--vintage-brown);
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.stellar-progress-fill {
+  height: 100%;
+  background: var(--forest-green);
+  transition: width 0.5s ease;
+  border-radius: 2px;
+}
+
+.stellar-bridge-result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stellar-result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: var(--crushed-paper);
+  border: 1px solid var(--vintage-brown);
+  border-radius: 4px;
+}
+
+.stellar-result-label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  color: var(--charcoal);
+}
+
+.stellar-result-value {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.8rem;
+  color: var(--vintage-brown);
+  font-weight: bold;
+}
+
+.stellar-explorer-links {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.stellar-explorer-link {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  color: var(--vintage-brown);
+  text-decoration: none;
+  padding: 0.25rem 0.5rem;
+  background: var(--crushed-paper);
+  border: 1px solid var(--vintage-brown);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.stellar-explorer-link:hover {
+  background: var(--vintage-brown);
+  color: var(--crushed-paper);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 0 var(--ink-black);
+}
+
+.stellar-account-info {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--crushed-paper);
+  border: 2px solid var(--vintage-brown);
+  border-radius: 8px;
+  box-shadow: 0 2px 0 var(--ink-black);
+}
+
+.stellar-account-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stellar-account-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: var(--crushed-paper);
+  border: 1px solid var(--vintage-brown);
+  border-radius: 4px;
+}
+
+.stellar-account-label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  color: var(--charcoal);
+}
+
+.stellar-account-value {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.7rem;
+  color: var(--vintage-brown);
+  font-weight: bold;
+  word-break: break-all;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stellar-header-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .stellar-stats {
+    justify-content: center;
+  }
+  
+  .stellar-tabs {
+    flex-wrap: wrap;
+  }
+  
+  .stellar-form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .stellar-htlc-item {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .stellar-htlc-actions {
+    justify-content: center;
+  }
+} 

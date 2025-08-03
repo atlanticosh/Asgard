@@ -21,7 +21,7 @@ import {
   Percent
 } from 'lucide-react';
 import { useGameStore } from '@/stores/gameStore';
-import { tradingService } from '@/services/tradingService';
+import { apiService } from '@/services/apiService';
 
 export default function MarketplacePage() {
   const { 
@@ -43,6 +43,7 @@ export default function MarketplacePage() {
   const [isBridging, setIsBridging] = useState(false);
   const [useRealTrading, setUseRealTrading] = useState(false);
   const [swapQuote, setSwapQuote] = useState<any>(null);
+  const [bridgeQuote, setBridgeQuote] = useState<any>(null);
 
   const tokens = [
     { symbol: 'ETH', name: 'Ethereum', price: 2450.32, change: 2.5, icon: '🔵' },
@@ -62,7 +63,7 @@ export default function MarketplacePage() {
         const fromAddress = player?.walletAddress || '';
         
         // Get swap quote first
-        const quote = await tradingService.getSwapQuote(
+        const quote = await apiService.getSwapQuote(
           swapFrom,
           swapTo,
           swapAmount,
@@ -72,7 +73,7 @@ export default function MarketplacePage() {
         setSwapQuote(quote);
         
         // Execute the swap
-        const swapTx = await tradingService.executeSwap(
+        const swapTx = await apiService.executeSwap(
           swapFrom,
           swapTo,
           swapAmount,
@@ -152,39 +153,87 @@ export default function MarketplacePage() {
     setIsBridging(true);
     
     try {
-      // Generate a mock transaction hash
-      const txHash = '0x' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      
-      // Calculate estimated value (mock)
-      const estimatedValue = parseFloat(bridgeAmount) * 1.00; // USDC price
-      
-      // Add transaction to backend
-      const response = await fetch('/api/profile/transactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          walletAddress: player?.walletAddress || '0x6f21...9f8e',
-          txHash: txHash,
-          type: 'bridge',
-          fromToken: 'USDC',
-          toToken: 'XLM',
-          amount: bridgeAmount,
-          valueUsd: estimatedValue,
-          chain: 'stellar',
-          blockNumber: Math.floor(Math.random() * 1000000),
-          gasUsed: Math.floor(Math.random() * 200000),
-          gasPrice: Math.random() * 50
-        })
-      });
+      if (useRealTrading) {
+        // Real bridging with actual wallet
+        const fromAddress = player?.walletAddress || '';
+        
+        // Get bridge quote first
+        const quote = await apiService.getBridgeQuote(
+          'ethereum',
+          bridgeToChain,
+          'USDC', // bridgeFromToken
+          bridgeAmount
+        );
+        
+        setBridgeQuote(quote);
+        
+        // Execute the bridge
+        const bridgeTx = await apiService.executeBridge(
+          'ethereum',
+          bridgeToChain,
+          'USDC', // bridgeFromToken
+          bridgeAmount,
+          fromAddress
+        );
+        
+        // Record transaction in backend
+        const response = await fetch('/api/profile/transactions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            walletAddress: fromAddress,
+            txHash: bridgeTx.txHash,
+            type: 'bridge',
+            fromToken: 'USDC',
+            toToken: 'XLM',
+            amount: bridgeAmount,
+            valueUsd: parseFloat(bridgeAmount), // Approximate value
+            chain: bridgeToChain,
+            blockNumber: 0, // Will be updated
+            gasUsed: '0', // Bridge transactions don't use gas on destination
+            gasPrice: '0'
+          })
+        });
 
-      if (response.ok) {
-        addXP(50);
-        addCredits(100);
-        setBridgeAmount('');
+        if (response.ok) {
+          addXP(50);
+          addCredits(100);
+          setBridgeAmount('');
+          setBridgeQuote(null);
+        }
       } else {
-        console.error('Failed to record transaction');
+        // Mock bridging (existing code)
+        const txHash = '0x' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        
+        const estimatedValue = parseFloat(bridgeAmount) * 1.00;
+        
+        const response = await fetch('/api/profile/transactions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            walletAddress: player?.walletAddress || '0x6f21...9f8e',
+            txHash: txHash,
+            type: 'bridge',
+            fromToken: 'USDC',
+            toToken: 'XLM',
+            amount: bridgeAmount,
+            valueUsd: estimatedValue,
+            chain: 'stellar',
+            blockNumber: Math.floor(Math.random() * 1000000),
+            gasUsed: Math.floor(Math.random() * 200000),
+            gasPrice: Math.random() * 50
+          })
+        });
+
+        if (response.ok) {
+          addXP(50);
+          addCredits(100);
+          setBridgeAmount('');
+        }
       }
     } catch (error) {
       console.error('Error during bridge:', error);

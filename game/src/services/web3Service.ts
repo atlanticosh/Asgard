@@ -10,10 +10,16 @@ const ERC20_ABI = [
 
 // Common token addresses (Ethereum Mainnet)
 const TOKEN_ADDRESSES = {
-  USDC: '0xA0b86a33E6441b8C4C8C8C8C8C8C8C8C8C8C8C8', // Replace with actual USDC address
-  WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-  DAI: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-  USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+  USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USD Coin
+  WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // Wrapped Ether
+  DAI: '0x6B175474E89094C44Da98b954EedeAC495271d0F', // Dai Stablecoin
+  USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7', // Tether USD
+  LINK: '0x514910771AF9Ca656af840dff83E8264EcF986CA', // Chainlink
+  UNI: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', // Uniswap
+  AAVE: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', // Aave
+  MATIC: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608aCafEBB0', // Polygon
+  CRV: '0xD533a949740bb3306d119CC777fa900bA034cd52', // Curve DAO Token
+  COMP: '0xc00e94Cb662C3520282E6f5717214004A7f26888' // Compound
 };
 
 export interface TokenBalance {
@@ -150,7 +156,13 @@ class Web3Service {
         'USDC': 'usd-coin',
         'WETH': 'weth',
         'DAI': 'dai',
-        'USDT': 'tether'
+        'USDT': 'tether',
+        'LINK': 'chainlink',
+        'UNI': 'uniswap',
+        'AAVE': 'aave',
+        'MATIC': 'matic-network',
+        'CRV': 'curve-dao-token',
+        'COMP': 'compound-governance-token'
       };
 
       const tokenId = tokenIds[symbol as keyof typeof tokenIds];
@@ -171,7 +183,13 @@ class Web3Service {
         'USDC': 'usd-coin',
         'WETH': 'weth',
         'DAI': 'dai',
-        'USDT': 'tether'
+        'USDT': 'tether',
+        'LINK': 'chainlink',
+        'UNI': 'uniswap',
+        'AAVE': 'aave',
+        'MATIC': 'matic-network',
+        'CRV': 'curve-dao-token',
+        'COMP': 'compound-governance-token'
       };
 
       const tokenId = tokenIds[symbol as keyof typeof tokenIds];
@@ -200,6 +218,12 @@ class Web3Service {
       'USDC': '💙',
       'DAI': '🟡',
       'USDT': '🟢',
+      'LINK': '🔗',
+      'UNI': '🦄',
+      'AAVE': '👻',
+      'MATIC': '💜',
+      'CRV': '🔄',
+      'COMP': '🏦',
       'XLM': '⭐'
     };
     return icons[symbol] || '🪙';

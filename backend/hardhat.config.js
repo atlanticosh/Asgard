@@ -38,6 +38,19 @@ module.exports = {
       gas: 'auto',
     },
 
+    // Base Sepolia testnet (alternative)
+    baseSepolia: {
+      url: process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org',
+      accounts:
+        process.env.ETHEREUM_PRIVATE_KEY &&
+        process.env.ETHEREUM_PRIVATE_KEY.length === 64
+          ? [process.env.ETHEREUM_PRIVATE_KEY]
+          : [],
+      chainId: 84532,
+      gasPrice: 'auto',
+      gas: 'auto',
+    },
+
     // Ethereum mainnet (for production)
     mainnet: {
       url:
@@ -79,4 +92,3 @@ module.exports = {
     timeout: 60000, // 60 seconds
   },
 };
- 

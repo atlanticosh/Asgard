@@ -18,6 +18,7 @@ const {
   setEthereumService: setBridgeEthereumService,
   setCoordinatorService: setBridgeCoordinatorService,
 } = require('./routes/bridge.routes');
+const tradingRoutes = require('./routes/trading.routes');
 const userRoutes = require('./routes/user.routes');
 const gameRoutes = require('./routes/game.routes');
 const analyticsRoutes = require('./routes/analytics.routes');
@@ -150,6 +151,7 @@ app.use('/health', healthRoutes);
 
 // API routes
 app.use('/api/bridge', bridgeRoutes);
+app.use('/api/trading', tradingRoutes);
 app.use('/api/user', authenticateToken, userRoutes);
 app.use('/api/game', authenticateToken, gameRoutes);
 app.use('/api/analytics', analyticsRoutes);

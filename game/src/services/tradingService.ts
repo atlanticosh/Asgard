@@ -62,38 +62,106 @@ class TradingService {
     fromAddress: string
   ): Promise<SwapQuote> {
     try {
-      const response = await fetch(
-        `${ONEINCH_API_URL}/quote?src=${fromToken}&dst=${toToken}&amount=${amount}&from=${fromAddress}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${ONEINCH_API_KEY}`,
-            'Accept': 'application/json'
+      // Try 1inch API first if key is available
+      if (ONEINCH_API_KEY) {
+        const response = await fetch(
+          `${ONEINCH_API_URL}/quote?src=${fromToken}&dst=${toToken}&amount=${amount}&from=${fromAddress}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${ONEINCH_API_KEY}`,
+              'Accept': 'application/json'
+            }
           }
-        }
-      );
+        );
 
-      if (!response.ok) {
-        throw new Error('Failed to get swap quote');
+        if (response.ok) {
+          const data = await response.json();
+          
+          return {
+            fromToken: data.fromToken.symbol,
+            toToken: data.toToken.symbol,
+            fromAmount: data.fromTokenAmount,
+            toAmount: data.toTokenAmount,
+            priceImpact: data.priceImpact,
+            gasEstimate: data.tx.gas,
+            route: data.protocols || []
+          };
+        }
       }
 
-      const data = await response.json();
-      
-      return {
-        fromToken: data.fromToken.symbol,
-        toToken: data.toToken.symbol,
-        fromAmount: data.fromTokenAmount,
-        toAmount: data.toTokenAmount,
-        priceImpact: data.priceImpact,
-        gasEstimate: data.tx.gas,
-        route: data.protocols || []
-      };
+      // Fallback: Use Uniswap V2 for basic swaps
+      return await this.getUniswapQuote(fromToken, toToken, amount, fromAddress);
     } catch (error) {
       console.error('Error getting swap quote:', error);
+      // Fallback to Uniswap V2
+      return await this.getUniswapQuote(fromToken, toToken, amount, fromAddress);
+    }
+  }
+
+  // Fallback: Get quote from Uniswap V2
+  private async getUniswapQuote(
+    fromToken: string,
+    toToken: string,
+    amount: string,
+    fromAddress: string
+  ): Promise<SwapQuote> {
+    try {
+      await this.initialize();
+
+      const uniswapRouter = new ethers.Contract(
+        '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D', // Uniswap V2 Router
+        UNISWAP_ROUTER_ABI,
+        this.provider!
+      );
+
+      // Convert token symbols to addresses
+      const fromAddress_contract = this.getTokenAddress(fromToken);
+      const toAddress_contract = this.getTokenAddress(toToken);
+
+      if (!fromAddress_contract || !toAddress_contract) {
+        throw new Error('Unsupported token pair');
+      }
+
+      const path = [fromAddress_contract, toAddress_contract];
+      const amountIn = ethers.parseUnits(amount, 18); // Assuming 18 decimals
+
+      const amounts = await uniswapRouter.getAmountsOut(amountIn, path);
+      const amountOut = ethers.formatUnits(amounts[1], 18);
+
+      // Calculate price impact (simplified)
+      const priceImpact = 0.5; // Mock value
+      const gasEstimate = '150000'; // Estimated gas
+
+      return {
+        fromToken,
+        toToken,
+        fromAmount: amount,
+        toAmount: amountOut,
+        priceImpact,
+        gasEstimate,
+        route: [['Uniswap V2', 100]] // Mock route
+      };
+    } catch (error) {
+      console.error('Error getting Uniswap quote:', error);
       throw error;
     }
   }
 
-  // Execute swap using 1inch API
+  // Helper: Get token address from symbol
+  private getTokenAddress(symbol: string): string | null {
+    const addresses: { [key: string]: string } = {
+      'ETH': '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
+      'WETH': '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      'USDC': '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+      'DAI': '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+      'USDT': '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      'LINK': '0x514910771AF9Ca656af840dff83E8264EcF986CA',
+      'UNI': '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'
+    };
+    return addresses[symbol] || null;
+  }
+
+  // Execute swap using 1inch API or fallback to Uniswap V2
   async executeSwap(
     fromToken: string,
     toToken: string,
@@ -104,45 +172,91 @@ class TradingService {
     try {
       await this.initialize();
 
-      // Get swap transaction data
-      const response = await fetch(
-        `${ONEINCH_API_URL}/swap?src=${fromToken}&dst=${toToken}&amount=${amount}&from=${fromAddress}&slippage=${slippage}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${ONEINCH_API_KEY}`,
-            'Accept': 'application/json'
-          }
-        }
-      );
+      // Try 1inch API first if key is available
+      if (ONEINCH_API_KEY) {
+        try {
+          const response = await fetch(
+            `${ONEINCH_API_URL}/swap?src=${fromToken}&dst=${toToken}&amount=${amount}&from=${fromAddress}&slippage=${slippage}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${ONEINCH_API_KEY}`,
+                'Accept': 'application/json'
+              }
+            }
+          );
 
-      if (!response.ok) {
-        throw new Error('Failed to get swap transaction');
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Execute the transaction
+            const tx = await this.signer!.sendTransaction({
+              to: data.tx.to,
+              data: data.tx.data,
+              value: data.tx.value || '0x0',
+              gasLimit: ethers.parseUnits(data.tx.gas, 'wei')
+            });
+
+            const receipt = await tx.wait();
+
+            return {
+              fromToken,
+              toToken,
+              fromAmount: amount,
+              toAmount: '0', // Will be updated after transaction
+              txHash: receipt!.hash,
+              status: 'pending',
+              gasUsed: receipt!.gasUsed?.toString(),
+              gasPrice: receipt!.gasPrice?.toString()
+            };
+          }
+        } catch (error) {
+          console.log('1inch API failed, falling back to Uniswap V2');
+        }
       }
 
-      const data = await response.json();
-      
-      // Execute the transaction
-      const tx = await this.signer!.sendTransaction({
-        to: data.tx.to,
-        data: data.tx.data,
-        value: data.tx.value || '0x0',
-        gasLimit: ethers.parseUnits(data.tx.gas, 'wei')
-      });
-
-      const receipt = await tx.wait();
-
-      return {
-        fromToken,
-        toToken,
-        fromAmount: amount,
-        toAmount: '0', // Will be updated after transaction
-        txHash: receipt!.hash,
-        status: 'pending',
-        gasUsed: receipt!.gasUsed?.toString(),
-        gasPrice: receipt!.gasPrice?.toString()
-      };
+      // Fallback: Use Uniswap V2 for basic swaps
+      return await this.executeUniswapSwap(fromToken, toToken, amount, fromAddress, slippage);
     } catch (error) {
       console.error('Error executing swap:', error);
+      throw error;
+    }
+  }
+
+  // Fallback: Execute swap using Uniswap V2
+  private async executeUniswapSwap(
+    fromToken: string,
+    toToken: string,
+    amount: string,
+    fromAddress: string,
+    slippage: number = 1
+  ): Promise<SwapTransaction> {
+    try {
+      const fromAddress_contract = this.getTokenAddress(fromToken);
+      const toAddress_contract = this.getTokenAddress(toToken);
+
+      if (!fromAddress_contract || !toAddress_contract) {
+        throw new Error('Unsupported token pair');
+      }
+
+      // Get quote first
+      const quote = await this.getUniswapQuote(fromToken, toToken, amount, fromAddress);
+      const minAmountOut = parseFloat(quote.toAmount) * (1 - slippage / 100);
+
+      let tx;
+      if (fromToken === 'ETH') {
+        // ETH to Token swap
+        tx = await this.swapEthForToken(toAddress_contract, amount, minAmountOut.toString());
+      } else if (toToken === 'ETH') {
+        // Token to ETH swap
+        tx = await this.swapTokenForEth(fromAddress_contract, amount, minAmountOut.toString());
+      } else {
+        // Token to Token swap (via ETH)
+        throw new Error('Token to Token swaps not supported in fallback mode');
+      }
+
+      return tx;
+    } catch (error) {
+      console.error('Error executing Uniswap swap:', error);
       throw error;
     }
   }

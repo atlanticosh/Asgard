@@ -293,18 +293,18 @@ export default function CityPage() {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <User className="w-5 h-5 text-vintage-brown" />
-                <span className="vintage-text text-sm text-charcoal">
+            <div className="flex items-center gap-2">
+              <User className="w-5 h-5 text-vintage-brown" />
+              <span className="vintage-text text-sm text-charcoal">
                   {player?.username || 'CryptoSurvivor_168'}
-                </span>
-                <div className="vintage-stat px-3 py-1">
-                  <span className="terminal-text text-xs">
-                    {player?.walletAddress ? 
-                      `${player.walletAddress.slice(0, 6)}...${player.walletAddress.slice(-4)}` : 
+              </span>
+              <div className="vintage-stat px-3 py-1">
+                <span className="terminal-text text-xs">
+                  {player?.walletAddress ? 
+                    `${player.walletAddress.slice(0, 6)}...${player.walletAddress.slice(-4)}` : 
                       '0x6f21...9f8e'
-                    }
-                  </span>
+                  }
+                </span>
                 </div>
               </div>
             </div>
@@ -320,7 +320,7 @@ export default function CityPage() {
               {cityBuildings.map((building, index) => {
                 const IconComponent = building.icon;
                 return (
-                  <motion.div
+                  <motion.div 
                     key={building.id}
                     className={`city-building ${building.available ? 'available' : 'locked'}`}
                     whileHover={{ scale: building.available ? 1.05 : 1 }}
@@ -338,12 +338,12 @@ export default function CityPage() {
             </div>
           </div>
 
-          <motion.div 
+            <motion.div 
             className={`city-side-panel ${showSidePanel ? 'open' : ''}`}
             initial={{ width: 0 }}
             animate={{ width: showSidePanel ? 400 : 0 }}
             transition={{ duration: 0.4 }}
-          >
+                  >
             {showSidePanel && selectedLocation && (
               <div className="city-side-panel-content">
                 <div className="city-side-panel-header">
@@ -418,7 +418,7 @@ export default function CityPage() {
                     EXPLORE
                   </button>
                 </div>
-              </div>
+                </div>
             )}
           </motion.div>
         </div>

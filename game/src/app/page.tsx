@@ -299,7 +299,7 @@ export default function HomePage() {
             )}
           </motion.div>
 
-                            {/* Main Content Area */}
+          {/* Main Content Area */}
           <div className="home-content-area">
             
             {/* Welcome Section */}
